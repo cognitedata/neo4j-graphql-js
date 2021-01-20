@@ -3,13 +3,13 @@ import { ApolloServer } from 'apollo-server';
 import neo4j from 'neo4j-driver';
 
 // JWT
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJzY29wZXMiOlsicmVhZDp1c2VyIiwiY3JlYXRlOnVzZXIiXX0.jCidMhYKk_0s8aQpXojYwZYz00eIG9lD_DbeXRKj4vA
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJzY29wZXMiOlsicmVhZDp1c2VyIiwiY3JlYXRlOnVzZXIiXX0.jCidMhYKk_0s8aQpXojYwZYz00eIG9lD_DbeXRKj4vA pragma: allowlist secret
 
 // scopes
 //  "scopes": ["read:user", "create:user"]
 
 // JWT_SECRET
-// oqldBPU1yMXcrTwcha1a9PGi9RHlPVzQ
+// oqldBPU1yMXcrTwcha1a9PGi9RHlPVzQ pragma: allowlist secret
 
 const typeDefs = `
 type User {
