@@ -1,5 +1,5 @@
 {
-  "name": "neo4j-graphql-js",
+  "name": "@cognite/neo4j-graphql-js",
   "version": "2.19.1",
   "description": "A GraphQL to Cypher query execution layer for Neo4j. ",
   "main": "./dist/index.js",
@@ -36,7 +36,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neo4j-graphql/neo4j-graphql-js"
+    "url": "git+https://github.com/neo4j-graphql/neo4j-graphql-js.git"
   },
   "devDependencies": {
     "@apollo/federation": "^0.20.7",
@@ -94,5 +94,13 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "bugs": {
+    "url": "https://github.com/neo4j-graphql/neo4j-graphql-js/issues"
+  },
+  "homepage": "https://github.com/neo4j-graphql/neo4j-graphql-js#readme",
+  "directories": {
+    "example": "example",
+    "test": "test"
   }
 }
