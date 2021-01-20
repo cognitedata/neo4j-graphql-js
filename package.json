@@ -36,7 +36,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neo4j-graphql/neo4j-graphql-js.git"
+    "url": "git+https://github.com/cognitedata/neo4j-graphql-js"
   },
   "devDependencies": {
     "@apollo/federation": "^0.20.7",
@@ -94,13 +94,5 @@
       "prettier --write",
       "git add"
     ]
-  },
-  "bugs": {
-    "url": "https://github.com/neo4j-graphql/neo4j-graphql-js/issues"
-  },
-  "homepage": "https://github.com/neo4j-graphql/neo4j-graphql-js#readme",
-  "directories": {
-    "example": "example",
-    "test": "test"
   }
 }
