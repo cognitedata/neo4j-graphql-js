@@ -5,7 +5,7 @@ export const CountType = {
   COUNT: 'Count'
 };
 /**
- * A map of the Neo4j Count from the _CountType query
+ * A map of the Neo4j Count from the _Neo4jCount query
  */
 export const Neo4jCount = {
   count: GraphQLInt.name
