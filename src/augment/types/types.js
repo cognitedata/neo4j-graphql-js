@@ -41,6 +41,7 @@ import {
 } from '../fields';
 import { augmentNodeType, augmentNodeTypeFields } from './node/node';
 import { RelationshipDirectionField } from '../types/relationship/relationship';
+import { CountType, Neo4jCount, augmentCountTypes } from './count';
 
 /**
  * An enum describing Neo4j entity types, used in type predicate functions
@@ -87,7 +88,8 @@ export const Neo4jDataType = {
     [TemporalType.DATETIME]: 'Temporal',
     [TemporalType.LOCALTIME]: 'Temporal',
     [TemporalType.LOCALDATETIME]: 'Temporal',
-    [SpatialType.POINT]: 'Spatial'
+    [SpatialType.POINT]: 'Spatial',
+    [CountType.COUNT]: 'Count'
   },
   STRUCTURAL: {
     [Kind.OBJECT_TYPE_DEFINITION]: Neo4jStructuralType,
@@ -392,6 +394,9 @@ const augmentNeo4jTypes = ({ generatedTypeMap, config }) => {
     typeMap: generatedTypeMap,
     config
   });
+  generatedTypeMap = augmentCountTypes({
+    typeMap: generatedTypeMap
+  });
   return generatedTypeMap;
 };
 
@@ -404,6 +409,7 @@ export const buildNeo4jTypes = ({
   neo4jTypes = {},
   config = {}
 }) => {
+  console.log(neo4jTypes);
   Object.values(neo4jTypes).forEach(typeName => {
     const typeNameLower = typeName.toLowerCase();
     if (
@@ -476,6 +482,10 @@ const buildNeo4jTypeFields = ({ typeName = '', config }) => {
   } else if (typeName === SpatialType.POINT) {
     fieldConfigs = Object.entries({
       ...Neo4jPoint
+    });
+  } else if (typeName === CountResultType.COUNT) {
+    fieldConfigs = Object.entries({
+      ...Neo4jCount
     });
   }
   fieldConfigs = fieldConfigs.map(([fieldName, fieldType]) => {

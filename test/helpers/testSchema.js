@@ -675,6 +675,9 @@ export const testSchema = `
       orderBy: [_PersonOrdering]
       filter: _PersonFilter
     ): [Person]
+    CountPerson(
+      filter: _PersonFilter
+    ): Int!
     InterfaceNoScalars(
       orderBy: _InterfaceNoScalarsOrdering
     ): [InterfaceNoScalars]
