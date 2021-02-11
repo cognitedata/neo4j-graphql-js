@@ -311,7 +311,8 @@ const APIConfiguration = {
   QUERY: 'query',
   MUTATION: 'mutation',
   TEMPORAL: 'temporal',
-  SPATIAL: 'spatial'
+  SPATIAL: 'spatial',
+  COUNT: 'count'
 };
 
 /**

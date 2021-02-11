@@ -1569,7 +1569,7 @@ const analyzeFilterArgument = ({
   schemaType,
   schema
 }) => {
-  console.log('analyzeFilterArgument');
+  console.log('analyzeFilterArgument', schemaType);
   const parsedFilterName = parseFilterArgumentName(fieldName);
   let filterOperationField = parsedFilterName.name;
   let filterOperationType = parsedFilterName.type;

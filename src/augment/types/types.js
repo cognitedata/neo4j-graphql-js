@@ -395,7 +395,8 @@ const augmentNeo4jTypes = ({ generatedTypeMap, config }) => {
     config
   });
   generatedTypeMap = augmentCountTypes({
-    typeMap: generatedTypeMap
+    typeMap: generatedTypeMap,
+    config
   });
   return generatedTypeMap;
 };
@@ -409,7 +410,6 @@ export const buildNeo4jTypes = ({
   neo4jTypes = {},
   config = {}
 }) => {
-  console.log(neo4jTypes);
   Object.values(neo4jTypes).forEach(typeName => {
     const typeNameLower = typeName.toLowerCase();
     if (
@@ -441,6 +441,24 @@ export const buildNeo4jTypes = ({
         })
       });
       // output object type
+      typeMap[neo4jTypeName] = buildObjectType({
+        name: buildName({ name: neo4jTypeName }),
+        fields: outputFields,
+        description: buildDescription({
+          value: `Generated ${typeName} object type for Neo4j [${cypherCategory} fields](${usingOutputDocUrl}).`,
+          config
+        })
+      });
+    } else if (config[typeNameLower] === true) {
+      const [_, outputFields] = buildNeo4jTypeFields({
+        typeName,
+        config
+      });
+      // decide some categorical labels used in dynamically generated descriptions
+      const cypherCategory = 'Count';
+      const usingOutputDocUrl = `${GRANDSTACK_DOCS}/graphql-spatial-types#using-count-in-queries`;
+      const neo4jTypeName = `${Neo4jTypeName}${typeName}`;
+      // Output count type
       typeMap[neo4jTypeName] = buildObjectType({
         name: buildName({ name: neo4jTypeName }),
         fields: outputFields,
@@ -483,7 +501,7 @@ const buildNeo4jTypeFields = ({ typeName = '', config }) => {
     fieldConfigs = Object.entries({
       ...Neo4jPoint
     });
-  } else if (typeName === CountResultType.COUNT) {
+  } else if (typeName === CountType.COUNT) {
     fieldConfigs = Object.entries({
       ...Neo4jCount
     });

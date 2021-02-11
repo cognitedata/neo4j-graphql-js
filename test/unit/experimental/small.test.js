@@ -339,6 +339,13 @@ test('Test aggregate schema', async t => {
       srid: Int
     }
 
+    """
+    Generated Count object type for Neo4j [Count fields](https://grandstack.io/docs/graphql-spatial-types#using-count-in-queries).
+    """
+    type _Neo4jCount {
+      count: Int
+    }
+
     enum _RelationDirections {
       IN
       OUT
@@ -361,7 +368,7 @@ test('Test aggregate schema', async t => {
       """
       [Generated query](https://grandstack.io/docs/graphql-schema-generation-augmentation#generated-queries) for counting A type nodes.
       """
-      _CountA(filter: _AFilter): Int!
+      CountA(filter: _AFilter): _Neo4jCount!
     }
 
     type Mutation {
@@ -395,7 +402,7 @@ test('Test aggregate schema', async t => {
       augmentedSchemaCypherTestRunner(
         t,
         `query {
-        _CountPerson(filter:{userId: 123})
+        CountPerson(filter:{userId: 123})
       }`,
         {},
         ''

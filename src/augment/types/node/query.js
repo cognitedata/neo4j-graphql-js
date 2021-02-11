@@ -13,7 +13,7 @@ import {
   useAuthDirective
 } from '../../directives';
 import { shouldAugmentType } from '../../augment';
-import { OperationType } from '../../types/types';
+import { Neo4jTypeName, OperationType } from '../../types/types';
 import {
   TypeWrappers,
   getFieldDefinition,
@@ -266,7 +266,7 @@ const buildNodeQueryCountField = ({
       buildField({
         name: buildName({ name: countTypeName }),
         type: buildNamedType({
-          name: '_CountResult',
+          name: `${Neo4jTypeName}Count`,
           wrappers: {
             [TypeWrappers.NON_NULL_NAMED_TYPE]: true
           }
