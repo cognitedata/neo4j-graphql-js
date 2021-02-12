@@ -398,18 +398,28 @@ test('Test aggregate schema', async t => {
   // const differences = diff(sourceSchema, expectedSchema);
 
   try {
-    return Promise.all([
-      augmentedSchemaCypherTestRunner(
-        t,
-        `query {
-        CountPerson(filter:{userId: 123})
+    await augmentedSchemaCypherTestRunner(
+      t,
+      `query {
+        CountPerson(filter:{userId: 123}) {
+          count
+        }
       }`,
-        {},
-        ''
-      )
-    ]);
+      {},
+      'MATCH (`Person`:`Person`) WHERE (`Person`.userId = $filter.userId) RETURN count(`Person`) AS count',
+      {
+        cypherParams: {
+          userId: 'user-id'
+        },
+        filter: { userId: '123' },
+        first: -1,
+        offset: 0
+      }
+    );
+    return;
   } catch (e) {
     console.log(e);
+    t.fail();
   }
   // if (differences.length) {
   //   console.log('differences: ', differences);

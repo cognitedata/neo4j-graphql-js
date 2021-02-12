@@ -68,6 +68,7 @@ import {
   isReflexiveRelationshipOutputType
 } from '../augment/types/relationship/query';
 import { ApolloError } from 'apollo-server-errors';
+import { Neo4jTypeName } from '../augment/types/types';
 
 const derivedTypesParamName = schemaTypeName =>
   `${schemaTypeName}_derivedTypes`;
@@ -1166,10 +1167,10 @@ const nodeQuery = ({
   isFederatedOperation,
   context,
   cypherParams,
-  schemaType,
+  schemaType: returnSchemaType,
   selections,
-  variableName,
-  typeName,
+  variableName: returnVariableName,
+  typeName: returnTypeName,
   isObjectType,
   isInterfaceType,
   isUnionType,
@@ -1186,6 +1187,15 @@ const nodeQuery = ({
   neo4jTypeArgs,
   _id
 }) => {
+  const isCount = returnVariableName === '_Neo4jCount';
+  const variableName = isCount
+    ? resolveInfo.fieldName.substr(5)
+    : returnVariableName;
+  const typeName = isCount ? resolveInfo.fieldName.substr(5) : returnTypeName;
+  const schemaType = isCount
+    ? resolveInfo.schema.getType(variableName)
+    : returnSchemaType;
+
   const safeVariableName = safeVar(variableName);
   const safeLabelName = safeLabel([typeName, ...additionalLabels]);
   const rootParamIndex = 1;
@@ -1199,7 +1209,6 @@ const nodeQuery = ({
     isFederatedOperation,
     context
   });
-  console.log('4');
   const [mapProjection, labelPredicate] = buildMapProjection({
     schemaType,
     schemaTypeFields,
@@ -1213,9 +1222,7 @@ const nodeQuery = ({
     resolveInfo
   });
 
-  console.log('3.2');
   const fieldArgs = getQueryArguments(resolveInfo, isFederatedOperation);
-  console.log('3.1');
   const [filterPredicates, serializedFilter] = processFilterArgument({
     fieldArgs,
     isFederatedOperation,
@@ -1225,7 +1232,6 @@ const nodeQuery = ({
     params: nonNullParams,
     paramIndex: rootParamIndex
   });
-  console.log('3');
 
   let params = { ...serializedFilter, ...subParams };
 
@@ -1259,7 +1265,6 @@ const nodeQuery = ({
     schemaTypeName: schemaType.name,
     usesFragments
   });
-  console.log('2');
 
   let fullTextSearchStatement = '';
   let fullTextScorePredicate = '';
@@ -1317,6 +1322,20 @@ const nodeQuery = ({
   }RETURN ${mapProjection} AS ${safeVariableName}${
     optimization.earlyOrderBy ? '' : orderByClause
   }${outerSkipLimit}`;
+
+  if (isCount) {
+    query = `${
+      fullTextSearchStatement
+        ? `${fullTextSearchStatement} `
+        : `MATCH (${safeVariableName}:${safeLabelName}${
+            argString ? ` ${argString}` : ''
+          })`
+    } ${predicate}${
+      optimization.earlyOrderBy
+        ? `WITH ${safeVariableName}${orderByClause}`
+        : ''
+    }RETURN count(${safeVariableName}) AS count`;
+  }
 
   return [query, { ...params, ...fragmentTypeParams }];
 };
@@ -1500,7 +1519,6 @@ export const processFilterArgument = ({
   // allows an exception for the existence of the filter argument AST
   // if isFederatedOperation
   if ((filterArg || isFederatedOperation) && filterValue) {
-    console.log('yes');
     // if field has both a filter argument and argument data is provided
     const schema = resolveInfo.schema;
     let serializedFilterParam = filterValue;
@@ -1512,7 +1530,6 @@ export const processFilterArgument = ({
       schemaType,
       schema
     });
-    console.log('3');
     translations = translateFilterArguments({
       filterValue,
       filterFieldMap,
@@ -1528,7 +1545,6 @@ export const processFilterArgument = ({
       [filterParamKey]: serializedFilterParam
     };
   }
-  console.log('3');
   return [translations, params];
 };
 
@@ -1569,7 +1585,6 @@ const analyzeFilterArgument = ({
   schemaType,
   schema
 }) => {
-  console.log('analyzeFilterArgument', schemaType);
   const parsedFilterName = parseFilterArgumentName(fieldName);
   let filterOperationField = parsedFilterName.name;
   let filterOperationType = parsedFilterName.type;
@@ -1609,13 +1624,11 @@ const analyzeFilterArgument = ({
         schema
       });
     } else {
-      console.log('analyzeFilterArgument', 1);
       const schemaTypeField = schemaType.getFields()[filterOperationField];
       const innerSchemaType = innerType(schemaTypeField.type);
       const isObjectTypeFilter = isObjectType(innerSchemaType);
       const isInterfaceTypeFilter = isInterfaceType(innerSchemaType);
       if (isObjectTypeFilter || isInterfaceTypeFilter) {
-        console.log('analyzeFilterArgument', 2);
         const [
           thisType,
           relatedType,
@@ -1660,7 +1673,6 @@ const analyzeFilterArgument = ({
           });
         } else if (isRelation || isRelationType || isRelationTypeNode) {
           // recursion
-          console.log('analyzeFilterArgument', 2);
           [serializedFilterParam, filterMapValue] = analyzeNestedFilterArgument(
             {
               filterValue,

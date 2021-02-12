@@ -677,7 +677,7 @@ export const testSchema = `
     ): [Person]
     CountPerson(
       filter: _PersonFilter
-    ): Int!
+    ): _Neo4jCount!
     InterfaceNoScalars(
       orderBy: _InterfaceNoScalarsOrdering
     ): [InterfaceNoScalars]
