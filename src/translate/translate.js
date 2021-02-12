@@ -1334,7 +1334,7 @@ const nodeQuery = ({
       optimization.earlyOrderBy
         ? `WITH ${safeVariableName}${orderByClause}`
         : ''
-    }RETURN count(${safeVariableName}) AS count`;
+    }RETURN {count: count(${safeVariableName})} AS _Neo4jCount `;
   }
 
   return [query, { ...params, ...fragmentTypeParams }];
