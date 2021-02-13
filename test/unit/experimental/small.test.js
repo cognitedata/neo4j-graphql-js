@@ -88,6 +88,10 @@ test('Test aggregate schema', async t => {
       _id_asc
       _id_desc
     }
+    enum _AGroupBy {
+      b
+      c
+    }
 
     input _AFilter {
       AND: [_AFilter!]
@@ -343,7 +347,8 @@ test('Test aggregate schema', async t => {
     Generated Count object type for Neo4j [Count fields](https://grandstack.io/docs/graphql-spatial-types#using-count-in-queries).
     """
     type _Neo4jCount {
-      count: Int
+      count: Int!
+      group: String
     }
 
     enum _RelationDirections {
@@ -368,7 +373,7 @@ test('Test aggregate schema', async t => {
       """
       [Generated query](https://grandstack.io/docs/graphql-schema-generation-augmentation#generated-queries) for counting A type nodes.
       """
-      CountA(filter: _AFilter): _Neo4jCount!
+      CountA(filter: _AFilter, groupBy: _AGroupBy): [_Neo4jCount!]
     }
 
     type Mutation {
@@ -394,8 +399,10 @@ test('Test aggregate schema', async t => {
     }
   `;
 
-  // const expectedSchema = buildSchema(expectedTypeDefs);
-  // const differences = diff(sourceSchema, expectedSchema);
+  const expectedSchema = buildSchema(expectedTypeDefs);
+  const differences = diff(sourceSchema, expectedSchema);
+
+  // t.assert(differences.length === 0);
 
   try {
     await augmentedSchemaCypherTestRunner(
@@ -406,7 +413,7 @@ test('Test aggregate schema', async t => {
         }
       }`,
       {},
-      'MATCH (`Person`:`Person`) WHERE (`Person`.userId = $filter.userId) RETURN count(`Person`) AS count',
+      'MATCH (`Person`:`Person`) WHERE (`Person`.userId = $filter.userId) RETURN {count: count(`Person`)} AS _Neo4jCount ',
       {
         cypherParams: {
           userId: 'user-id'
@@ -416,16 +423,28 @@ test('Test aggregate schema', async t => {
         offset: 0
       }
     );
+    await augmentedSchemaCypherTestRunner(
+      t,
+      `query {
+        CountPerson(filter:{userId: 123}, groupBy: "userId") {
+          count
+        }
+      }`,
+      {},
+      'MATCH (`Person`:`Person` {groupBy:$groupBy}) WHERE (`Person`.userId = $filter.userId) RETURN {group: `Person`.`userId`, count: count(`Person`)} AS _Neo4jCount ',
+      {
+        cypherParams: {
+          userId: 'user-id'
+        },
+        filter: { userId: '123' },
+        groupBy: 'userId',
+        first: -1,
+        offset: 0
+      }
+    );
     return;
   } catch (e) {
     console.log(e);
     t.fail();
   }
-  // if (differences.length) {
-  //   console.log('differences: ', differences);
-  //   t.fail();
-  // } else {
-  //   t.pass();
-  // }
-  t.end();
 });

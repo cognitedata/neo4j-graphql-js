@@ -67,6 +67,10 @@ export const SearchArgument = {
   SEARCH: 'search'
 };
 
+export const GroupArgument = {
+  GROUP: 'groupBy'
+};
+
 export const isDataSelectionArgument = name =>
   Object.values({
     ...PagingArgument,
@@ -115,6 +119,14 @@ export const augmentInputTypePropertyFields = ({
     !isSpatialField({ type: outputType })
   ) {
     orderingType.values.push(...buildPropertyOrderingValues({ fieldName }));
+  }
+  const groupByType = inputTypeMap[GroupArgument.GROUP];
+  if (
+    groupByType &&
+    !isListTypeField({ field }) &&
+    !isSpatialField({ type: outputType })
+  ) {
+    groupByType.values.push(...buildPropertyGroupByValues({ fieldName }));
   }
   return inputTypeMap;
 };
@@ -247,6 +259,29 @@ export const buildQueryFieldArguments = ({
         }
       }
     }
+    if (name === GroupArgument.GROUP && !isUnionType) {
+      if (!isCypherField({ directives: fieldDirectives })) {
+        const argumentIndex = fieldArguments.findIndex(
+          arg => arg.name.value === GroupArgument.GROUP
+        );
+        // Does overwrite
+        if (argumentIndex === -1) {
+          fieldArguments.push(
+            buildQueryGroupByArgument({
+              typeName: outputType
+            })
+          );
+        } else {
+          fieldArguments.splice(
+            argumentIndex,
+            1,
+            buildQueryGroupByArgument({
+              typeName: outputType
+            })
+          );
+        }
+      }
+    }
   });
   return fieldArguments;
 };
@@ -312,6 +347,27 @@ export const buildQueryOrderingEnumType = ({
   }
   return generatedTypeMap;
 };
+/**
+ * Builds the AST definition for an enum type used as the
+ * type of an ordering field argument
+ */
+export const buildQueryGroupByEnumType = ({
+  nodeInputTypeMap,
+  typeDefinitionMap,
+  generatedTypeMap
+}) => {
+  const inputType = nodeInputTypeMap[GroupArgument.GROUP];
+  if (inputType && inputType.values.length) {
+    const groupByName = inputType.name;
+    const type = typeDefinitionMap[inputType.name];
+    // Prevent overwrite
+    if (!type) {
+      inputType.name = buildName({ name: groupByName });
+      generatedTypeMap[groupByName] = buildEnumType(inputType);
+    }
+  }
+  return generatedTypeMap;
+};
 
 /**
  * Builds the AST definitions for the values of an enum
@@ -323,6 +379,16 @@ export const buildPropertyOrderingValues = ({ fieldName }) => [
   }),
   buildEnumValue({
     name: buildName({ name: `${fieldName}_desc` })
+  })
+];
+
+/**
+ * Builds the AST definitions for the values of an enum
+ * definitions used by an ordering field argument
+ */
+export const buildPropertyGroupByValues = ({ fieldName }) => [
+  buildEnumValue({
+    name: buildName({ name: `${fieldName}` })
   })
 ];
 
@@ -343,6 +409,14 @@ const buildQuerySearchArgument = ({ typeName }) =>
     name: buildName({ name: SearchArgument.SEARCH }),
     type: buildNamedType({
       name: `_${typeName}Search`
+    })
+  });
+
+const buildQueryGroupByArgument = ({ typeName }) =>
+  buildInputValue({
+    name: buildName({ name: GroupArgument.GROUP }),
+    type: buildNamedType({
+      name: `_${typeName}GroupBy`
     })
   });
 

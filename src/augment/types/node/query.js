@@ -29,7 +29,9 @@ import {
   buildQueryFieldArguments,
   buildQueryFilteringInputType,
   buildQuerySearchInputType,
-  buildQueryOrderingEnumType
+  buildQueryOrderingEnumType,
+  GroupArgument,
+  buildQueryGroupByEnumType
 } from '../../input-values';
 
 /**
@@ -45,7 +47,8 @@ const NodeQueryArgument = {
 
 const NodeCountQueryArgument = {
   ...FilteringArgument,
-  ...SearchArgument
+  ...SearchArgument,
+  ...GroupArgument
 };
 
 const GRANDSTACK_DOCS = `https://grandstack.io/docs`;
@@ -59,6 +62,7 @@ const GRANDSTACK_DOCS_GENERATED_QUERIES = `${GRANDSTACK_DOCS}/graphql-schema-gen
 export const augmentNodeQueryAPI = ({
   typeName,
   isUnionType,
+  isInterfaceType,
   searchesType,
   propertyInputValues,
   nodeInputTypeMap,
@@ -84,19 +88,26 @@ export const augmentNodeQueryAPI = ({
         typeExtensionDefinitionMap,
         config
       });
-      operationTypeMap = buildNodeQueryCountField({
-        typeName,
-        isUnionType,
-        searchesType,
-        queryType,
-        operationTypeMap,
-        typeDefinitionMap,
-        typeExtensionDefinitionMap,
-        config
-      });
+      if (!isUnionType && !isInterfaceType) {
+        operationTypeMap = buildNodeQueryCountField({
+          typeName,
+          isUnionType,
+          searchesType,
+          queryType,
+          operationTypeMap,
+          typeDefinitionMap,
+          typeExtensionDefinitionMap,
+          config
+        });
+      }
     }
     if (!isUnionType) {
       generatedTypeMap = buildQueryOrderingEnumType({
+        nodeInputTypeMap,
+        typeDefinitionMap,
+        generatedTypeMap
+      });
+      generatedTypeMap = buildQueryGroupByEnumType({
         nodeInputTypeMap,
         typeDefinitionMap,
         generatedTypeMap
@@ -268,7 +279,8 @@ const buildNodeQueryCountField = ({
         type: buildNamedType({
           name: `${Neo4jTypeName}Count`,
           wrappers: {
-            [TypeWrappers.NON_NULL_NAMED_TYPE]: true
+            [TypeWrappers.NON_NULL_NAMED_TYPE]: true,
+            [TypeWrappers.LIST_TYPE]: true
           }
         }),
         args: buildNodeCountQueryArguments({

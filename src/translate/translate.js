@@ -59,6 +59,7 @@ import {
   TypeWrappers
 } from '../augment/fields';
 import {
+  GroupArgument,
   isNeo4jTypeArgument,
   OrderingArgument,
   SearchArgument
@@ -1324,6 +1325,16 @@ const nodeQuery = ({
   }${outerSkipLimit}`;
 
   if (isCount) {
+    const countGroupBy = fieldArgs.find(
+      arg => arg.name.value === GroupArgument.GROUP
+    );
+    const countGroupByValue = params[GroupArgument.GROUP];
+    let groupByString = '';
+    if (countGroupBy && countGroupByValue) {
+      groupByString = `group: ${safeVariableName}.${safeVar(
+        countGroupByValue
+      )}, `;
+    }
     query = `${
       fullTextSearchStatement
         ? `${fullTextSearchStatement} `
@@ -1334,7 +1345,7 @@ const nodeQuery = ({
       optimization.earlyOrderBy
         ? `WITH ${safeVariableName}${orderByClause}`
         : ''
-    }RETURN {count: count(${safeVariableName})} AS _Neo4jCount `;
+    }RETURN {${groupByString}count: count(${safeVariableName})} AS _Neo4jCount `;
   }
 
   return [query, { ...params, ...fragmentTypeParams }];
