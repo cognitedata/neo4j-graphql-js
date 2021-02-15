@@ -1349,7 +1349,6 @@ const nodeQuery = ({
         ? `WITH ${safeVariableName}${orderByClause}`
         : ''
     }RETURN {${groupByString}count: count(${safeVariableName})} AS _Neo4jCount `;
-    console.log(query);
   }
 
   return [query, { ...params, ...fragmentTypeParams }];
