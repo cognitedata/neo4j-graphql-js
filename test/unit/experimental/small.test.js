@@ -431,7 +431,7 @@ test('Test aggregate schema', async t => {
         }
       }`,
       {},
-      'MATCH (`Person`:`Person` {groupBy:$groupBy}) WHERE (`Person`.userId = $filter.userId) RETURN {group: `Person`.`userId`, count: count(`Person`)} AS _Neo4jCount ',
+      'MATCH (`Person`:`Person`) WHERE (`Person`.userId = $filter.userId) RETURN {group: `Person`.`userId`, count: count(`Person`)} AS _Neo4jCount ',
       {
         cypherParams: {
           userId: 'user-id'

@@ -1242,7 +1242,10 @@ const nodeQuery = ({
 
   const args = innerFilterParams(filterParams, neo4jTypeArgs);
   const argString = paramsToString(
-    _.filter(args, arg => !Array.isArray(arg.value))
+    _.filter(
+      args,
+      arg => !Array.isArray(arg.value) && isCount && arg.key !== 'groupBy'
+    )
   );
 
   const idWherePredicate =
@@ -1346,6 +1349,7 @@ const nodeQuery = ({
         ? `WITH ${safeVariableName}${orderByClause}`
         : ''
     }RETURN {${groupByString}count: count(${safeVariableName})} AS _Neo4jCount `;
+    console.log(query);
   }
 
   return [query, { ...params, ...fragmentTypeParams }];
