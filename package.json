@@ -16,7 +16,8 @@
     "build-with-sourcemaps": "babel src --presets @babel/preset-env --out-dir dist --source-maps",
     "precommit": "lint-staged",
     "prepare": "npm run build",
-    "test": "nyc --reporter=lcov ava test/unit/augmentSchemaTest.test.js test/unit/configTest.test.js test/unit/assertSchema.test.js test/unit/searchSchema.test.js test/unit/cypherTest.test.js test/unit/filterTest.test.js test/unit/filterTests.test.js test/unit/custom/cypherTest.test.js test/unit/experimental/augmentSchemaTest.test.js test/unit/experimental/cypherTest.test.js test/unit/experimental/custom/cypherTest.test.js",
+    "test": "nyc --reporter=lcov ava test/unit/augmentSchemaTest.test.js test/unit/configTest.test.js test/unit/assertSchema.test.js test/unit/searchSchema.test.js test/unit/cypherTest.test.js test/unit/filterTest.test.js test/unit/custom/cypherTest.test.js test/unit/experimental/augmentSchemaTest.test.js test/unit/experimental/cypherTest.test.js test/unit/experimental/custom/cypherTest.test.js test/unit/aggregate.test.js",
+    "test-new": "ava test/unit/aggregate.test.js",
     "parse-tck": "babel-node test/helpers/tck/parseTck.js",
     "test-tck": "nyc ava --fail-fast test/unit/filterTests.test.js",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
@@ -59,6 +60,7 @@
     "express": "^4.17.1",
     "graphql-tag": "^2.10.1",
     "husky": "^0.14.3",
+    "jest": "^26.6.3",
     "lint-staged": "^7.2.0",
     "node-fetch": "^2.3.0",
     "nodemon": "^1.18.11",
@@ -71,11 +73,14 @@
     "@babel/runtime-corejs2": "^7.5.5",
     "apollo-server-errors": "^2.4.1",
     "debug": "^4.1.1",
+    "graphql": "^15.5.0",
     "graphql-auth-directives": "^2.2.2",
+    "graphql-tools": "^7.0.2",
     "lodash": "^4.17.19",
-    "neo4j-driver": "^4.2.1",
-    "graphql": "^15.4.0",
-    "graphql-tools": "^7.0.2"
+    "neo4j-driver": "^4.2.1"
+  },
+  "resolutions": {
+    "graphql": "15.5.0"
   },
   "ava": {
     "require": [

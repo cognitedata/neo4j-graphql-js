@@ -1166,10 +1166,10 @@ const nodeQuery = ({
   isFederatedOperation,
   context,
   cypherParams,
-  schemaType,
+  schemaType: returnSchemaType,
   selections,
-  variableName,
-  typeName,
+  variableName: returnVariableName,
+  typeName: returnTypeName,
   isObjectType,
   isInterfaceType,
   isUnionType,
@@ -1186,6 +1186,15 @@ const nodeQuery = ({
   neo4jTypeArgs,
   _id
 }) => {
+  const isCount = returnVariableName === '_Neo4jCount';
+  const variableName = isCount
+    ? resolveInfo.fieldName.substr(5)
+    : returnVariableName;
+  const typeName = isCount ? resolveInfo.fieldName.substr(5) : returnTypeName;
+  const schemaType = isCount
+    ? resolveInfo.schema.getType(variableName)
+    : returnSchemaType;
+
   const safeVariableName = safeVar(variableName);
   const safeLabelName = safeLabel([typeName, ...additionalLabels]);
   const rootParamIndex = 1;
@@ -1231,7 +1240,10 @@ const nodeQuery = ({
 
   const args = innerFilterParams(filterParams, neo4jTypeArgs);
   const argString = paramsToString(
-    _.filter(args, arg => !Array.isArray(arg.value))
+    _.filter(
+      args,
+      arg => !Array.isArray(arg.value) && isCount && arg.key !== 'groupBy'
+    )
   );
 
   const idWherePredicate =
@@ -1312,6 +1324,20 @@ const nodeQuery = ({
   }RETURN ${mapProjection} AS ${safeVariableName}${
     optimization.earlyOrderBy ? '' : orderByClause
   }${outerSkipLimit}`;
+
+  if (isCount) {
+    query = `${
+      fullTextSearchStatement
+        ? `${fullTextSearchStatement} `
+        : `MATCH (${safeVariableName}:${safeLabelName}${
+            argString ? ` ${argString}` : ''
+          })`
+    } ${predicate}${
+      optimization.earlyOrderBy
+        ? `WITH ${safeVariableName}${orderByClause}`
+        : ''
+    }RETURN {count: count(${safeVariableName})} AS _Neo4jCount `;
+  }
 
   return [query, { ...params, ...fragmentTypeParams }];
 };

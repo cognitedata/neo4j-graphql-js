@@ -193,6 +193,7 @@ export function cypherMutation(
 export const augmentTypeDefs = (typeDefs, config = {}) => {
   config.query = false;
   config.mutation = false;
+  config.count = true;
   if (config.isFederated === undefined) config.isFederated = false;
   const isParsedTypeDefs = isSchemaDocument({ definition: typeDefs });
   let definitions = [];
