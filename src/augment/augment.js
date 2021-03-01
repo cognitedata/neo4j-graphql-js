@@ -314,6 +314,10 @@ const APIConfiguration = {
   SPATIAL: 'spatial',
   COUNT: 'count'
 };
+// An enum containing the names of the augmentation config keys
+const IsDisabledAPIConfiguration = {
+  COUNT: true // means disabled, this is dumb
+};
 
 /**
  * Builds the default values in a given configuration object
@@ -322,7 +326,9 @@ export const setDefaultConfig = ({ config = {} }) => {
   const configKeys = Object.keys(config);
   Object.values(APIConfiguration).forEach(configKey => {
     if (!configKeys.find(providedKey => providedKey === configKey)) {
-      config[configKey] = true;
+      config[configKey] = IsDisabledAPIConfiguration[configKey.toUpperCase()]
+        ? false
+        : true;
     }
   });
   return config;
