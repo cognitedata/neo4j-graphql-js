@@ -449,7 +449,7 @@ export const buildNeo4jTypes = ({
           config
         })
       });
-    } else if (config[typeNameLower] === true) {
+    } else if (config[typeNameLower] === true && typeNameLower === 'count') {
       const [_, outputFields] = buildNeo4jTypeFields({
         typeName,
         config

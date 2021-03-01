@@ -138,3 +138,9 @@ You can learn more by typing:
 :help EXPLAIN
 :help params
 ```
+
+# Automatic Publishing
+
+Merge a commit with `Release x.x.x` after bumping the package.json version to `x.x.x`, it would automatically deploy.
+
+Ref: https://github.com/pascalgn/npm-publish-action

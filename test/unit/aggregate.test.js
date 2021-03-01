@@ -15,9 +15,7 @@ test('Test aggregate schema', async t => {
 
   const sourceSchema = makeAugmentedSchema({
     typeDefs: parseTypeDefs,
-    config: {
-      experimental: true
-    }
+    config: { experimental: true }
   });
 
   const expectedTypeDefs = /* GraphQL */ `
@@ -87,10 +85,6 @@ test('Test aggregate schema', async t => {
       c_desc
       _id_asc
       _id_desc
-    }
-    enum _AGroupBy {
-      b
-      c
     }
 
     input _AFilter {
@@ -347,7 +341,7 @@ test('Test aggregate schema', async t => {
     Generated Count object type for Neo4j [Count fields](https://grandstack.io/docs/graphql-spatial-types#using-count-in-queries).
     """
     type _Neo4jCount {
-      count: Int!
+      count: Int
     }
 
     enum _RelationDirections {
@@ -372,7 +366,7 @@ test('Test aggregate schema', async t => {
       """
       [Generated query](https://grandstack.io/docs/graphql-schema-generation-augmentation#generated-queries) for counting A type nodes.
       """
-      CountA(filter: _AFilter, groupBy: _AGroupBy): [_Neo4jCount!]
+      CountA(filter: _AFilter): [_Neo4jCount!]
     }
 
     type Mutation {
@@ -401,7 +395,20 @@ test('Test aggregate schema', async t => {
   const expectedSchema = buildSchema(expectedTypeDefs);
   const differences = diff(sourceSchema, expectedSchema);
 
-  // t.assert(differences.length === 0);
+  t.assert(differences.length === 0);
+
+  // Disabled case
+  const sourceSchemaFailed = makeAugmentedSchema({
+    typeDefs: parseTypeDefs,
+    config: {
+      count: false,
+      experimental: true
+    }
+  });
+  const differencesFailed = diff(sourceSchemaFailed, expectedSchema);
+
+  // Added type, Added Query
+  t.assert(differencesFailed.length === 2);
 
   try {
     await augmentedSchemaCypherTestRunner(
