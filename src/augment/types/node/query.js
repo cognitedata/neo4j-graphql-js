@@ -85,10 +85,9 @@ export const augmentNodeQueryAPI = ({
         typeExtensionDefinitionMap,
         config
       });
-      if (!isUnionType && !isInterfaceType && config['count']) {
+      if (!isUnionType && !isInterfaceType && config['count'] === true) {
         operationTypeMap = buildNodeQueryCountField({
           typeName,
-          isUnionType,
           searchesType,
           queryType,
           operationTypeMap,
@@ -243,7 +242,6 @@ const buildNodeQueryField = ({
  */
 const buildNodeQueryCountField = ({
   typeName,
-  isUnionType,
   searchesType,
   queryType,
   operationTypeMap,
@@ -277,7 +275,7 @@ const buildNodeQueryCountField = ({
         }),
         args: buildNodeCountQueryArguments({
           typeName,
-          isUnionType,
+          isUnionType: false,
           typeDefinitionMap,
           searchesType
         }),

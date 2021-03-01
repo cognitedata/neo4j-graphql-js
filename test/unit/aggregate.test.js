@@ -418,7 +418,7 @@ test('Aggregate > Augment when `count: true` in config', t => {
 
   t.assert(differences.length === 0);
 });
-test('Aggregate > Sample query using count with no groupby', async t => {
+test('Aggregate > Sample query using count', async t => {
   t.plan(2);
   try {
     await augmentedSchemaCypherTestRunner(

@@ -68,6 +68,8 @@ import {
   isReflexiveRelationshipOutputType
 } from '../augment/types/relationship/query';
 import { ApolloError } from 'apollo-server-errors';
+import { Neo4jTypeName } from '../augment/types/types';
+import { getReturnTypeDetails, isCountQuery } from '../utils/count';
 
 const derivedTypesParamName = schemaTypeName =>
   `${schemaTypeName}_derivedTypes`;
@@ -1186,14 +1188,15 @@ const nodeQuery = ({
   neo4jTypeArgs,
   _id
 }) => {
-  const isCount = returnVariableName === '_Neo4jCount';
-  const variableName = isCount
-    ? resolveInfo.fieldName.substr(5)
-    : returnVariableName;
-  const typeName = isCount ? resolveInfo.fieldName.substr(5) : returnTypeName;
-  const schemaType = isCount
-    ? resolveInfo.schema.getType(variableName)
-    : returnSchemaType;
+  const isCount = isCountQuery(returnVariableName);
+
+  const { variableName, typeName, schemaType } = getReturnTypeDetails(
+    isCount,
+    resolveInfo,
+    returnVariableName,
+    returnTypeName,
+    returnSchemaType
+  );
 
   const safeVariableName = safeVar(variableName);
   const safeLabelName = safeLabel([typeName, ...additionalLabels]);
@@ -1240,10 +1243,7 @@ const nodeQuery = ({
 
   const args = innerFilterParams(filterParams, neo4jTypeArgs);
   const argString = paramsToString(
-    _.filter(
-      args,
-      arg => !Array.isArray(arg.value) && isCount && arg.key !== 'groupBy'
-    )
+    _.filter(args, arg => !Array.isArray(arg.value) && isCount)
   );
 
   const idWherePredicate =
@@ -1332,11 +1332,7 @@ const nodeQuery = ({
         : `MATCH (${safeVariableName}:${safeLabelName}${
             argString ? ` ${argString}` : ''
           })`
-    } ${predicate}${
-      optimization.earlyOrderBy
-        ? `WITH ${safeVariableName}${orderByClause}`
-        : ''
-    }RETURN {count: count(${safeVariableName})} AS _Neo4jCount `;
+    } ${predicate}RETURN {count: count(${safeVariableName})} AS _Neo4jCount `;
   }
 
   return [query, { ...params, ...fragmentTypeParams }];
