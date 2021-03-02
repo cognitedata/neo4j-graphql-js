@@ -173,7 +173,10 @@ export function cypherTestRunner(
       customCreateNode: checkCypherMutation
     }
   };
-  let augmentedTypeDefs = augmentTypeDefs(testMovieSchema, { auth: true });
+  let augmentedTypeDefs = augmentTypeDefs(testMovieSchema, {
+    auth: true,
+    count: true
+  });
   const schema = makeExecutableSchema({
     typeDefs: augmentedTypeDefs,
     resolvers,
@@ -215,7 +218,8 @@ const cypherTestTypeDefs = printSchemaDocument({
       }
     },
     config: {
-      auth: true
+      auth: true,
+      count: true
     }
   })
 });
@@ -243,6 +247,7 @@ export function augmentedSchemaCypherTestRunner(
   const resolvers = {
     QueryA: {
       Person: checkCypherQuery,
+      CountPerson: checkCypherQuery,
       Actor: checkCypherQuery,
       User: checkCypherQuery,
       Genre: checkCypherQuery,

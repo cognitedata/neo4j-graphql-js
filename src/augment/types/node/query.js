@@ -1,4 +1,4 @@
-import { GraphQLString } from 'graphql';
+import { GraphQLInt, GraphQLString } from 'graphql';
 import { buildRelationshipFilters } from '../relationship/query';
 import {
   buildField,
@@ -13,7 +13,7 @@ import {
   useAuthDirective
 } from '../../directives';
 import { shouldAugmentType } from '../../augment';
-import { OperationType } from '../../types/types';
+import { Neo4jTypeName, OperationType } from '../../types/types';
 import {
   TypeWrappers,
   getFieldDefinition,
@@ -43,6 +43,11 @@ const NodeQueryArgument = {
   ...SearchArgument
 };
 
+const NodeCountQueryArgument = {
+  ...FilteringArgument,
+  ...SearchArgument
+};
+
 const GRANDSTACK_DOCS = `https://grandstack.io/docs`;
 const GRANDSTACK_DOCS_GENERATED_QUERIES = `${GRANDSTACK_DOCS}/graphql-schema-generation-augmentation#generated-queries`;
 
@@ -54,6 +59,7 @@ const GRANDSTACK_DOCS_GENERATED_QUERIES = `${GRANDSTACK_DOCS}/graphql-schema-gen
 export const augmentNodeQueryAPI = ({
   typeName,
   isUnionType,
+  isInterfaceType,
   searchesType,
   propertyInputValues,
   nodeInputTypeMap,
@@ -79,6 +85,17 @@ export const augmentNodeQueryAPI = ({
         typeExtensionDefinitionMap,
         config
       });
+      if (!isUnionType && !isInterfaceType && config['count'] === true) {
+        operationTypeMap = buildNodeQueryCountField({
+          typeName,
+          searchesType,
+          queryType,
+          operationTypeMap,
+          typeDefinitionMap,
+          typeExtensionDefinitionMap,
+          config
+        });
+      }
     }
     if (!isUnionType) {
       generatedTypeMap = buildQueryOrderingEnumType({
@@ -220,6 +237,64 @@ const buildNodeQueryField = ({
 };
 
 /**
+ * Builds the AST for the Query type field definition for
+ * a given node type's count
+ */
+const buildNodeQueryCountField = ({
+  typeName,
+  searchesType,
+  queryType,
+  operationTypeMap,
+  typeDefinitionMap,
+  typeExtensionDefinitionMap,
+  config
+}) => {
+  const countTypeName = `Count${typeName}`;
+  const queryFields = queryType.fields;
+  const queryTypeName = queryType ? queryType.name.value : '';
+  const queryTypeExtensions = typeExtensionDefinitionMap[queryTypeName];
+  if (
+    !getFieldDefinition({
+      fields: queryFields,
+      name: countTypeName
+    }) &&
+    !getTypeExtensionFieldDefinition({
+      typeExtensions: queryTypeExtensions,
+      name: countTypeName
+    })
+  ) {
+    queryFields.push(
+      buildField({
+        name: buildName({ name: countTypeName }),
+        type: buildNamedType({
+          name: `${Neo4jTypeName}Count`,
+          wrappers: {
+            [TypeWrappers.NON_NULL_NAMED_TYPE]: true,
+            [TypeWrappers.LIST_TYPE]: true
+          }
+        }),
+        args: buildNodeCountQueryArguments({
+          typeName,
+          isUnionType: false,
+          typeDefinitionMap,
+          searchesType
+        }),
+        directives: buildNodeQueryDirectives({
+          typeName,
+          config
+        }),
+        description: buildDescription({
+          value: `[Generated query](${GRANDSTACK_DOCS_GENERATED_QUERIES}) for counting ${typeName} type nodes.`,
+          config
+        })
+      })
+    );
+  }
+  operationTypeMap[OperationType.QUERY].fields = queryFields;
+  return operationTypeMap;
+};
+
+/**
  * Builds the AST for input value definitions used for the
  * arguments of the Query type field for a given node type
  */
@@ -269,6 +344,28 @@ const buildNodeQueryArguments = ({
     fieldArguments: propertyInputValues,
     outputType: typeName,
     isListType: true,
+    searchesType,
+    isUnionType,
+    typeDefinitionMap
+  });
+  return propertyInputValues;
+};
+
+/**
+ * Builds the AST for input value definitions used for the
+ * arguments of the Count Query type field for a given node type
+ */
+const buildNodeCountQueryArguments = ({
+  typeName,
+  isUnionType,
+  typeDefinitionMap,
+  searchesType = false
+}) => {
+  const propertyInputValues = buildQueryFieldArguments({
+    argumentMap: NodeCountQueryArgument,
+    fieldArguments: [],
+    outputType: typeName,
+    isListType: false,
     searchesType,
     isUnionType,
     typeDefinitionMap
