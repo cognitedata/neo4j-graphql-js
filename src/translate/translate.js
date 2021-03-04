@@ -1243,7 +1243,7 @@ const nodeQuery = ({
 
   const args = innerFilterParams(filterParams, neo4jTypeArgs);
   const argString = paramsToString(
-    _.filter(args, arg => !Array.isArray(arg.value) && isCount)
+    _.filter(args, arg => !Array.isArray(arg.value))
   );
 
   const idWherePredicate =
