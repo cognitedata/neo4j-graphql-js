@@ -10,7 +10,8 @@ test('Call assertSchema for @id, @unique, and @index fields on node types', t =>
   const schema = makeAugmentedSchema({
     typeDefs: testSchema,
     config: {
-      auth: true
+      auth: true,
+      count: true
     }
   });
   const expected = `CALL apoc.schema.assert({State:["name"],UniqueNode:["anotherId"]}, {Movie:["movieId"],Person:["userId"],Camera:["id"],OldCamera:["id"],NewCamera:["id"],UniqueNode:["string","id"],UniqueStringNode:["uniqueString"]})`;
