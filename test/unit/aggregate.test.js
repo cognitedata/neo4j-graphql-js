@@ -490,7 +490,7 @@ test('Aggregate > Sample query using count and group by field in relationship', 
         }
       }`,
       {},
-      'MATCH (`Genre`:`Genre`)<-[:`IN_GENRE`]-(`movies`:`Movie`) WHERE (`Genre`.name = $filter.name) RETURN {group: `movies`.`year`, count: count(`Genre`)} AS _Neo4jCount ',
+      'MATCH (`Genre`:`Genre`)<-[:`IN_GENRE`]-(`_movie`:`Movie`) WHERE (`Genre`.name = $filter.name) RETURN {group: `_movie`.`year`, count: count(`Genre`)} AS _Neo4jCount ',
       {
         cypherParams: {
           userId: 'user-id'

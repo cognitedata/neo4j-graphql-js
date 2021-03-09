@@ -1370,14 +1370,14 @@ const nodeQuery = ({
         // generate a string based on all the facts we know
         expandLevelsString += `${!isDirectionOut ? '<' : ''}-[:${safeLabel(
           childRelationLabel
-        )}]-${isDirectionOut ? '>' : ''}(${safeVar(level)}:${safeLabel(
-          childTypeName
-        )})`;
+        )}]-${isDirectionOut ? '>' : ''}(${safeVar(
+          `_${childTypeName.toLowerCase()}`
+        )}:${safeLabel(childTypeName)})`;
 
         // for next iteration, change the current schema
         currentSchema = resolveInfo.schema.getType(childTypeName);
         // set the level to be safe env incase we exit the loop
-        level = safeVar(level);
+        level = safeVar(`_${childTypeName.toLowerCase()}`);
       }
       groupByString = `group: ${level}.${safeVar(
         groupByLevels[groupByLevels.length - 1]
