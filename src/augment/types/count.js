@@ -8,7 +8,8 @@ export const CountType = {
  * A map of the Neo4j Count from the _Neo4jCount query
  */
 export const Neo4jCount = {
-  count: GraphQLInt.name
+  count: GraphQLInt.name,
+  group: GraphQLString.name
 };
 
 export const augmentCountTypes = ({ typeMap, config = {} }) => {

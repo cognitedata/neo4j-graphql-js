@@ -333,6 +333,7 @@ const expectedTypeDefs = /* GraphQL */ `
   """
   type _Neo4jCount {
     count: Int
+    group: String
   }
 
   enum _RelationDirections {
@@ -357,7 +358,7 @@ const expectedTypeDefs = /* GraphQL */ `
     """
     [Generated query](https://grandstack.io/docs/graphql-schema-generation-augmentation#generated-queries) for counting A type nodes.
     """
-    CountA(filter: _AFilter): [_Neo4jCount!]
+    CountA(filter: _AFilter, groupBy: String): [_Neo4jCount!]
   }
 
   type Mutation {
@@ -439,6 +440,63 @@ test('Aggregate > Sample query using count', async t => {
           userId: 'user-id'
         },
         filter: { userId: '123' },
+        first: -1,
+        offset: 0
+      }
+    );
+    return;
+  } catch (e) {
+    console.log(e);
+    t.fail();
+  }
+});
+test('Aggregate > Sample query using count and group by field', async t => {
+  t.plan(2);
+  try {
+    await augmentedSchemaCypherTestRunner(
+      t,
+      `query {
+        CountPerson(filter:{userId: 123}, groupBy: "userId") {
+          count
+        }
+      }`,
+      {},
+      'MATCH (`Person`:`Person`) WHERE (`Person`.userId = $filter.userId) RETURN {group: `Person`.`userId`, count: count(`Person`)} AS _Neo4jCount ',
+      {
+        cypherParams: {
+          userId: 'user-id'
+        },
+        filter: { userId: '123' },
+        groupBy: 'userId',
+        first: -1,
+        offset: 0
+      }
+    );
+    return;
+  } catch (e) {
+    console.log(e);
+    t.fail();
+  }
+});
+test('Aggregate > Sample query using count and group by field in relationship', async t => {
+  t.plan(2);
+  try {
+    await augmentedSchemaCypherTestRunner(
+      t,
+      `query {
+        CountGenre(filter:{name: "123"}, groupBy: "movies.year") {
+          count
+          group
+        }
+      }`,
+      {},
+      'MATCH (`Genre`:`Genre`)<-[:`IN_GENRE`]-(`movies`:`Movie`) WHERE (`Genre`.name = $filter.name) RETURN {group: `movies`.`year`, count: count(`Genre`)} AS _Neo4jCount ',
+      {
+        cypherParams: {
+          userId: 'user-id'
+        },
+        filter: { name: '123' },
+        groupBy: 'movies.year',
         first: -1,
         offset: 0
       }

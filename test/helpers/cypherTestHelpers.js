@@ -248,6 +248,7 @@ export function augmentedSchemaCypherTestRunner(
     QueryA: {
       Person: checkCypherQuery,
       CountPerson: checkCypherQuery,
+      CountGenre: checkCypherQuery,
       Actor: checkCypherQuery,
       User: checkCypherQuery,
       Genre: checkCypherQuery,

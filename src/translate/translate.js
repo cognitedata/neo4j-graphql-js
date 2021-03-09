@@ -59,6 +59,7 @@ import {
   TypeWrappers
 } from '../augment/fields';
 import {
+  GroupArgument,
   isNeo4jTypeArgument,
   OrderingArgument,
   SearchArgument
@@ -1243,7 +1244,11 @@ const nodeQuery = ({
 
   const args = innerFilterParams(filterParams, neo4jTypeArgs);
   const argString = paramsToString(
-    _.filter(args, arg => !Array.isArray(arg.value))
+    _.filter(
+      args,
+      arg =>
+        !Array.isArray(arg.value) && (isCount ? arg.key !== 'groupBy' : true)
+    )
   );
 
   const idWherePredicate =
@@ -1326,15 +1331,66 @@ const nodeQuery = ({
   }${outerSkipLimit}`;
 
   if (isCount) {
+    // figure out the group by field and load the value
+    const countGroupBy = fieldArgs.find(
+      arg => arg.name.value === GroupArgument.GROUP
+    );
+    const countGroupByValue = params[GroupArgument.GROUP];
+
+    let groupByString = '';
+    let expandLevelsString = '';
+    if (countGroupBy && countGroupByValue) {
+      // figure out if we need to load in children
+      const groupByLevels = countGroupByValue.split('.');
+
+      // figure out the current schema and the current level of loading
+      let currentSchema = resolveInfo.schema.getType(variableName);
+      let level = `${safeVariableName}`;
+
+      for (level of groupByLevels.slice(0, groupByLevels.length - 1)) {
+        // figure out the type of child
+        const childType = currentSchema.astNode.fields.find(
+          el => el.name.value === level
+        );
+        // get the name of the type of the child (the ternary is needed in case of wrapping)
+        const childTypeName = childType.type.type.type
+          ? childType.type.type.type.name.value
+          : childType.type.type.name.value;
+        // figure out the label of the relation
+        const childRelationLabel = childType.directives
+          .find(el => el.name.value === 'relation')
+          .arguments.find(el => el.name.value === 'name').value.value;
+        // figure out the direction of the relation
+        const isDirectionOut =
+          childType.directives
+            .find(el => el.name.value === 'relation')
+            .arguments.find(el => el.name.value === 'direction').value.value ===
+          'OUT';
+
+        // generate a string based on all the facts we know
+        expandLevelsString += `${!isDirectionOut ? '<' : ''}-[:${safeLabel(
+          childRelationLabel
+        )}]-${isDirectionOut ? '>' : ''}(${safeVar(level)}:${safeLabel(
+          childTypeName
+        )})`;
+
+        // for next iteration, change the current schema
+        currentSchema = resolveInfo.schema.getType(childTypeName);
+        // set the level to be safe env incase we exit the loop
+        level = safeVar(level);
+      }
+      groupByString = `group: ${level}.${safeVar(
+        groupByLevels[groupByLevels.length - 1]
+      )}, `;
+    }
     query = `${
       fullTextSearchStatement
         ? `${fullTextSearchStatement} `
         : `MATCH (${safeVariableName}:${safeLabelName}${
             argString ? ` ${argString}` : ''
           })`
-    } ${predicate}RETURN {count: count(${safeVariableName})} AS _Neo4jCount `;
+    }${expandLevelsString} ${predicate}RETURN {${groupByString}count: count(${safeVariableName})} AS _Neo4jCount `;
   }
-
   return [query, { ...params, ...fragmentTypeParams }];
 };
 

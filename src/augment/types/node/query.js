@@ -29,7 +29,8 @@ import {
   buildQueryFieldArguments,
   buildQueryFilteringInputType,
   buildQuerySearchInputType,
-  buildQueryOrderingEnumType
+  buildQueryOrderingEnumType,
+  GroupArgument
 } from '../../input-values';
 
 /**
@@ -45,7 +46,8 @@ const NodeQueryArgument = {
 
 const NodeCountQueryArgument = {
   ...FilteringArgument,
-  ...SearchArgument
+  ...SearchArgument,
+  ...GroupArgument
 };
 
 const GRANDSTACK_DOCS = `https://grandstack.io/docs`;
