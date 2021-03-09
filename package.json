@@ -1,6 +1,6 @@
 {
   "name": "@cognite/neo4j-graphql-js",
-  "version": "2.19.6",
+  "version": "2.19.7-alpha",
   "description": "A GraphQL to Cypher query execution layer for Neo4j. ",
   "main": "./dist/index.js",
   "scripts": {
