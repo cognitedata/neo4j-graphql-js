@@ -31,7 +31,7 @@ jobs:
       run: npm install
 
     - name: Test
-      run: npm run test-new
+      run: npm run test
 
     - name: Publish if version has been updated 
       uses: JS-DevTools/npm-publish@v1

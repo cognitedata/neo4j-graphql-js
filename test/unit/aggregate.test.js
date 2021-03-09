@@ -35,6 +35,10 @@ const expectedTypeDefs = /* GraphQL */ `
 
   directive @search(index: String) on FIELD_DEFINITION
 
+  directive @subscribe(to: [String]) on FIELD_DEFINITION
+
+  directive @publish(event: String) on FIELD_DEFINITION
+
   input _ACreate {
     b: String!
     c: String!
