@@ -434,7 +434,7 @@ test('Aggregate > Sample query using count', async t => {
         }
       }`,
       {},
-      'MATCH (`Person`:`Person`) WHERE (`Person`.userId = $filter.userId) RETURN {count: count(`Person`)} AS _Neo4jCount ',
+      'MATCH (`person`:`Person`) WHERE (`person`.userId = $filter.userId) RETURN {count: count(`person`)} AS _Neo4jCount ',
       {
         cypherParams: {
           userId: 'user-id'
@@ -461,7 +461,7 @@ test('Aggregate > Sample query using count and group by field', async t => {
         }
       }`,
       {},
-      'MATCH (`Person`:`Person`) WHERE (`Person`.userId = $filter.userId) RETURN {group: `Person`.`userId`, count: count(`Person`)} AS _Neo4jCount ',
+      'MATCH (`person`:`Person`) WHERE (`person`.userId = $filter.userId) RETURN {group: `person`.`userId`, count: count(`person`)} AS _Neo4jCount ',
       {
         cypherParams: {
           userId: 'user-id'
@@ -490,7 +490,7 @@ test('Aggregate > Sample query using count and group by field in relationship', 
         }
       }`,
       {},
-      'MATCH (`Genre`:`Genre`)<-[:`IN_GENRE`]-(`_movie`:`Movie`) WHERE (`Genre`.name = $filter.name) RETURN {group: `_movie`.`year`, count: count(`Genre`)} AS _Neo4jCount ',
+      'MATCH (`genre`:`Genre`)<-[:`IN_GENRE`]-(`_movie`:`Movie`) WHERE (`genre`.name = $filter.name) RETURN {group: `_movie`.`year`, count: count(`genre`)} AS _Neo4jCount ',
       {
         cypherParams: {
           userId: 'user-id'

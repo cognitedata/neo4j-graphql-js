@@ -1344,7 +1344,6 @@ const nodeQuery = ({
       const groupByLevels = countGroupByValue.split('.');
 
       // figure out the current schema and the current level of loading
-      console.log(typeName, safeVariableName, variableName);
       let currentSchema = resolveInfo.schema.getType(typeName);
       let level = `${safeVariableName}`;
 
@@ -1392,7 +1391,6 @@ const nodeQuery = ({
           })`
     }${expandLevelsString} ${predicate}RETURN {${groupByString}count: count(${safeVariableName})} AS _Neo4jCount `;
   }
-  console.log(query);
   return [query, { ...params, ...fragmentTypeParams }];
 };
 
