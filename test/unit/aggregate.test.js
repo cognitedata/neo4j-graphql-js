@@ -1,5 +1,5 @@
 import test from 'ava';
-import { makeAugmentedSchema } from '../../src/index';
+import { cypherQuery, makeAugmentedSchema } from '../../src/index';
 import { gql } from 'apollo-server';
 import { buildSchema, graphql, printSchema } from 'graphql';
 import { diff } from '@graphql-inspector/core';
@@ -507,3 +507,81 @@ test('Aggregate > Sample query using count and group by field in relationship', 
     t.fail();
   }
 });
+
+test('Aggregate > Complex multilevel groupby', async t => {
+  t.plan(2);
+  try {
+    await augmentedSchemaTest(
+      t,
+      `{
+        CountEquipment(groupBy: "facilities.company.name") {
+          count
+          group
+        }
+      }`,
+      {},
+      'MATCH (`equipment`:`Equipment`)-[:`IN_FACILITY`]->(`_facility`:`Facility`)-[:`IN_COMPANY`]->(`_company`:`Company`) RETURN {group: `_company`.`name`, count: count(`equipment`)} AS _Neo4jCount ',
+      {
+        groupBy: 'facilities.company.name',
+        first: -1,
+        offset: 0
+      },
+      `type Equipment {
+            id: ID!
+            type: String! @search
+            facilities: [Facility] @relation(name: "IN_FACILITY", direction: OUT)
+        }
+        
+        type Facility {
+            id: ID!
+            name: String!
+            tag: String
+            company: Company @relation(name: "IN_COMPANY", direction: OUT)
+        }
+        
+        type Company {
+            name: String
+        }`,
+      ['CountEquipment']
+    );
+    return;
+  } catch (e) {
+    console.log(e);
+    t.fail();
+  }
+});
+
+function augmentedSchemaTest(
+  t,
+  graphqlQuery,
+  graphqlParams,
+  expectedCypherQuery,
+  expectedCypherParams,
+  schema,
+  schemaResolverChecks
+) {
+  const checkCypherQuery = (object, params, ctx, resolveInfo) => {
+    const [query, queryParams] = cypherQuery(params, ctx, resolveInfo);
+    t.is(query, expectedCypherQuery);
+    const deserializedParams = JSON.parse(JSON.stringify(queryParams));
+    t.deepEqual(deserializedParams, expectedCypherParams);
+  };
+  const resolvers = {
+    Query: schemaResolverChecks.reduce(
+      (prev, el) => ({ ...prev, [el]: checkCypherQuery }),
+      {}
+    )
+  };
+  const augmentedSchema = makeAugmentedSchema({
+    typeDefs: schema,
+    config: {
+      count: true
+    },
+    resolvers,
+    resolverValidationOptions: {
+      requireResolversForResolveType: false
+    }
+  });
+
+  return graphql(augmentedSchema, graphqlQuery, null, null, graphqlParams);
+}

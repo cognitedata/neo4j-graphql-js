@@ -1352,10 +1352,13 @@ const nodeQuery = ({
         const childType = currentSchema.astNode.fields.find(
           el => el.name.value === level
         );
+        let childTypeTemp = childType.type;
+        while ('type' in childTypeTemp) {
+          childTypeTemp = childTypeTemp.type;
+        }
         // get the name of the type of the child (the ternary is needed in case of wrapping)
-        const childTypeName = childType.type.type.type
-          ? childType.type.type.type.name.value
-          : childType.type.type.name.value;
+        const childTypeName = childTypeTemp.name.value;
+
         // figure out the label of the relation
         const childRelationLabel = childType.directives
           .find(el => el.name.value === 'relation')
