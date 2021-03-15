@@ -1,6 +1,6 @@
 import test from 'ava';
 import { cypherQuery, makeAugmentedSchema } from '../../src/index';
-import { gql } from 'apollo-server';
+import { ApolloError, gql } from 'apollo-server';
 import { buildSchema, graphql, printSchema } from 'graphql';
 import { diff } from '@graphql-inspector/core';
 import { augmentedSchemaCypherTestRunner } from '../helpers/cypherTestHelpers';
@@ -506,6 +506,43 @@ test('Aggregate > Sample query using count and group by field in relationship', 
     console.log(e);
     t.fail();
   }
+});
+test('Aggregate > Sample query using count and invalid group by', async t => {
+  const error = await augmentedSchemaTest(
+    t,
+    `{
+        CountEquipment(groupBy: "facilities.compay.name") {
+          count
+          group
+        }
+      }`,
+    {},
+    'MATCH (`equipment`:`Equipment`)-[:`IN_FACILITY`]->(`_facility`:`Facility`)-[:`IN_COMPANY`]->(`_company`:`Company`) RETURN {group: `_company`.`name`, count: count(`equipment`)} AS _Neo4jCount ',
+    {
+      groupBy: 'facilities.company.name',
+      first: -1,
+      offset: 0
+    },
+    `type Equipment {
+            id: ID!
+            type: String! @search
+            facilities: [Facility] @relation(name: "IN_FACILITY", direction: OUT)
+        }
+        
+        type Facility {
+            id: ID!
+            name: String!
+            tag: String
+            company: Company @relation(name: "IN_COMPANY", direction: OUT)
+        }
+        
+        type Company {
+            name: String
+        }`,
+    ['CountEquipment']
+  );
+  t.is(error.errors[0].message, 'Unable to group by "compay"');
+  return;
 });
 
 test('Aggregate > Complex multilevel groupby', async t => {

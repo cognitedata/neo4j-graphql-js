@@ -1352,6 +1352,9 @@ const nodeQuery = ({
         const childType = currentSchema.astNode.fields.find(
           el => el.name.value === level
         );
+        if (!childType) {
+          throw new Error(`Unable to group by "${level}"`);
+        }
         let childTypeTemp = childType.type;
         while ('type' in childTypeTemp) {
           childTypeTemp = childTypeTemp.type;
