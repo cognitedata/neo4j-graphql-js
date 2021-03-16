@@ -16,7 +16,8 @@ import {
   FilteringArgument,
   OrderingArgument,
   augmentInputTypePropertyFields,
-  SearchArgument
+  SearchArgument,
+  GroupArgument
 } from '../../input-values';
 import {
   getRelationDirection,
@@ -38,7 +39,8 @@ import {
   isQueryTypeDefinition,
   isUnionTypeDefinition,
   isObjectTypeExtensionDefinition,
-  isInterfaceTypeExtensionDefinition
+  isInterfaceTypeExtensionDefinition,
+  isInterfaceTypeDefinition
 } from '../../types/types';
 import { ApolloError } from 'apollo-server-errors';
 
@@ -223,6 +225,16 @@ export const augmentNodeTypeFields = ({
       if (!nodeInputTypeMap[OrderingArgument.ORDER_BY]) {
         nodeInputTypeMap[OrderingArgument.ORDER_BY] = {
           name: `_${typeName}Ordering`,
+          values: []
+        };
+      }
+      if (
+        !isObjectExtension &&
+        !isInterfaceTypeDefinition({ definition }) &&
+        !nodeInputTypeMap[GroupArgument.GROUP]
+      ) {
+        nodeInputTypeMap[GroupArgument.GROUP] = {
+          name: `_${typeName}GroupBy`,
           values: []
         };
       }

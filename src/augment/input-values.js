@@ -67,6 +67,10 @@ export const SearchArgument = {
   SEARCH: 'search'
 };
 
+export const GroupArgument = {
+  GROUP: 'groupBy'
+};
+
 export const isDataSelectionArgument = name =>
   Object.values({
     ...PagingArgument,
@@ -247,6 +251,29 @@ export const buildQueryFieldArguments = ({
         }
       }
     }
+    if (name === GroupArgument.GROUP && !isUnionType) {
+      if (!isCypherField({ directives: fieldDirectives })) {
+        const argumentIndex = fieldArguments.findIndex(
+          arg => arg.name.value === GroupArgument.GROUP
+        );
+        // Does overwrite
+        if (argumentIndex === -1) {
+          fieldArguments.push(
+            buildQueryGroupByArgument({
+              typeName: outputType
+            })
+          );
+        } else {
+          fieldArguments.splice(
+            argumentIndex,
+            1,
+            buildQueryGroupByArgument({
+              typeName: outputType
+            })
+          );
+        }
+      }
+    }
   });
   return fieldArguments;
 };
@@ -343,6 +370,14 @@ const buildQuerySearchArgument = ({ typeName }) =>
     name: buildName({ name: SearchArgument.SEARCH }),
     type: buildNamedType({
       name: `_${typeName}Search`
+    })
+  });
+
+const buildQueryGroupByArgument = ({ typeName }) =>
+  buildInputValue({
+    name: buildName({ name: GroupArgument.GROUP }),
+    type: buildNamedType({
+      name: GraphQLString.name
     })
   });
 

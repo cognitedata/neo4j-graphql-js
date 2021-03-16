@@ -1,6 +1,6 @@
 import test from 'ava';
-import { makeAugmentedSchema } from '../../src/index';
-import { gql } from 'apollo-server';
+import { cypherQuery, makeAugmentedSchema } from '../../src/index';
+import { ApolloError, gql } from 'apollo-server';
 import { buildSchema, graphql, printSchema } from 'graphql';
 import { diff } from '@graphql-inspector/core';
 import { augmentedSchemaCypherTestRunner } from '../helpers/cypherTestHelpers';
@@ -333,6 +333,7 @@ const expectedTypeDefs = /* GraphQL */ `
   """
   type _Neo4jCount {
     count: Int
+    group: String
   }
 
   enum _RelationDirections {
@@ -357,7 +358,7 @@ const expectedTypeDefs = /* GraphQL */ `
     """
     [Generated query](https://grandstack.io/docs/graphql-schema-generation-augmentation#generated-queries) for counting A type nodes.
     """
-    CountA(filter: _AFilter): [_Neo4jCount!]
+    CountA(filter: _AFilter, groupBy: String): [_Neo4jCount!]
   }
 
   type Mutation {
@@ -433,7 +434,7 @@ test('Aggregate > Sample query using count', async t => {
         }
       }`,
       {},
-      'MATCH (`Person`:`Person`) WHERE (`Person`.userId = $filter.userId) RETURN {count: count(`Person`)} AS _Neo4jCount ',
+      'MATCH (`person`:`Person`) WHERE (`person`.userId = $filter.userId) RETURN {count: count(`person`)} AS _Neo4jCount ',
       {
         cypherParams: {
           userId: 'user-id'
@@ -449,3 +450,175 @@ test('Aggregate > Sample query using count', async t => {
     t.fail();
   }
 });
+test('Aggregate > Sample query using count and group by field', async t => {
+  t.plan(2);
+  try {
+    await augmentedSchemaCypherTestRunner(
+      t,
+      `query {
+        CountPerson(filter:{userId: 123}, groupBy: "userId") {
+          count
+        }
+      }`,
+      {},
+      'MATCH (`person`:`Person`) WHERE (`person`.userId = $filter.userId) RETURN {group: `person`.`userId`, count: count(`person`)} AS _Neo4jCount ',
+      {
+        cypherParams: {
+          userId: 'user-id'
+        },
+        filter: { userId: '123' },
+        groupBy: 'userId',
+        first: -1,
+        offset: 0
+      }
+    );
+    return;
+  } catch (e) {
+    console.log(e);
+    t.fail();
+  }
+});
+test('Aggregate > Sample query using count and group by field in relationship', async t => {
+  t.plan(2);
+  try {
+    await augmentedSchemaCypherTestRunner(
+      t,
+      `query {
+        CountGenre(filter:{name: "123"}, groupBy: "movies.year") {
+          count
+          group
+        }
+      }`,
+      {},
+      'MATCH (`genre`:`Genre`)<-[:`IN_GENRE`]-(`_movie`:`Movie`) WHERE (`genre`.name = $filter.name) RETURN {group: `_movie`.`year`, count: count(`genre`)} AS _Neo4jCount ',
+      {
+        cypherParams: {
+          userId: 'user-id'
+        },
+        filter: { name: '123' },
+        groupBy: 'movies.year',
+        first: -1,
+        offset: 0
+      }
+    );
+    return;
+  } catch (e) {
+    console.log(e);
+    t.fail();
+  }
+});
+test('Aggregate > Sample query using count and invalid group by', async t => {
+  const error = await augmentedSchemaTest(
+    t,
+    `{
+        CountEquipment(groupBy: "facilities.compay.name") {
+          count
+          group
+        }
+      }`,
+    {},
+    'MATCH (`equipment`:`Equipment`)-[:`IN_FACILITY`]->(`_facility`:`Facility`)-[:`IN_COMPANY`]->(`_company`:`Company`) RETURN {group: `_company`.`name`, count: count(`equipment`)} AS _Neo4jCount ',
+    {
+      groupBy: 'facilities.company.name',
+      first: -1,
+      offset: 0
+    },
+    `type Equipment {
+            id: ID!
+            type: String! @search
+            facilities: [Facility] @relation(name: "IN_FACILITY", direction: OUT)
+        }
+        
+        type Facility {
+            id: ID!
+            name: String!
+            tag: String
+            company: Company @relation(name: "IN_COMPANY", direction: OUT)
+        }
+        
+        type Company {
+            name: String
+        }`,
+    ['CountEquipment']
+  );
+  t.is(error.errors[0].message, 'Unable to group by "compay"');
+  return;
+});
+
+test('Aggregate > Complex multilevel groupby', async t => {
+  t.plan(2);
+  try {
+    await augmentedSchemaTest(
+      t,
+      `{
+        CountEquipment(groupBy: "facilities.company.name") {
+          count
+          group
+        }
+      }`,
+      {},
+      'MATCH (`equipment`:`Equipment`)-[:`IN_FACILITY`]->(`_facility`:`Facility`)-[:`IN_COMPANY`]->(`_company`:`Company`) RETURN {group: `_company`.`name`, count: count(`equipment`)} AS _Neo4jCount ',
+      {
+        groupBy: 'facilities.company.name',
+        first: -1,
+        offset: 0
+      },
+      `type Equipment {
+            id: ID!
+            type: String! @search
+            facilities: [Facility] @relation(name: "IN_FACILITY", direction: OUT)
+        }
+        
+        type Facility {
+            id: ID!
+            name: String!
+            tag: String
+            company: Company @relation(name: "IN_COMPANY", direction: OUT)
+        }
+        
+        type Company {
+            name: String
+        }`,
+      ['CountEquipment']
+    );
+    return;
+  } catch (e) {
+    console.log(e);
+    t.fail();
+  }
+});
+
+function augmentedSchemaTest(
+  t,
+  graphqlQuery,
+  graphqlParams,
+  expectedCypherQuery,
+  expectedCypherParams,
+  schema,
+  schemaResolverChecks
+) {
+  const checkCypherQuery = (object, params, ctx, resolveInfo) => {
+    const [query, queryParams] = cypherQuery(params, ctx, resolveInfo);
+    t.is(query, expectedCypherQuery);
+    const deserializedParams = JSON.parse(JSON.stringify(queryParams));
+    t.deepEqual(deserializedParams, expectedCypherParams);
+  };
+  const resolvers = {
+    Query: schemaResolverChecks.reduce(
+      (prev, el) => ({ ...prev, [el]: checkCypherQuery }),
+      {}
+    )
+  };
+  const augmentedSchema = makeAugmentedSchema({
+    typeDefs: schema,
+    config: {
+      count: true
+    },
+    resolvers,
+    resolverValidationOptions: {
+      requireResolversForResolveType: false
+    }
+  });
+
+  return graphql(augmentedSchema, graphqlQuery, null, null, graphqlParams);
+}
