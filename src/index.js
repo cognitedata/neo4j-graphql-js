@@ -337,9 +337,7 @@ export const assertSchema = ({
       )
       .finally(() => session.close());
   };
-  return executeQuery(driver).catch(error => {
-    console.error(error);
-  });
+  return executeQuery(driver);
 };
 
 export const searchSchema = async ({
