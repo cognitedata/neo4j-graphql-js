@@ -3407,7 +3407,7 @@ test('fliter interfaced relationship type field for outgoing object type nodes',
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`person\`:\`Person\`) WHERE (EXISTS((\`person\`)-[:INTERFACED_RELATIONSHIP_TYPE]->(:Genre)) AND ALL(\`person_filter_genre\` IN [(\`person\`)-[\`_person_filter_genre\`:INTERFACED_RELATIONSHIP_TYPE]->(:Genre) | \`_person_filter_genre\`] WHERE (ALL(\`genre\` IN [(\`person\`)-[\`person_filter_genre\`]->(\`_genre\`:Genre) | \`_genre\`] WHERE (\`genre\`.name = $filter.interfacedRelationshipType.Genre.name))))) RETURN \`person\` {FRAGMENT_TYPE: head( [ label IN labels(\`person\`) WHERE label IN $Person_derivedTypes ] ), .userId , .name ,interfacedRelationshipType: [(\`person\`)-[\`person_interfacedRelationshipType_relation\`:\`INTERFACED_RELATIONSHIP_TYPE\`]->(:\`Genre\`) WHERE (\`person_interfacedRelationshipType_relation\`.string = $1_filter.string) | person_interfacedRelationshipType_relation { .string ,Genre: head([(:\`Person\`)-[\`person_interfacedRelationshipType_relation\`]->(\`person_interfacedRelationshipType_Genre\`:\`Genre\`) | person_interfacedRelationshipType_Genre { .name }]) }] } AS \`person\``,
+    expectedCypherQuery = `MATCH (\`person\`:\`Person\`) WHERE (EXISTS((\`person\`)-[:INTERFACED_RELATIONSHIP_TYPE]->(:Genre)) AND ALL(\`person_filter_genre\` IN [(\`person\`)-[\`_person_filter_genre\`:INTERFACED_RELATIONSHIP_TYPE]->(:Genre) | \`_person_filter_genre\`] WHERE (ALL(\`genre\` IN [(\`person\`)-[\`person_filter_genre\`]->(\`_genre\`:Genre) | \`_genre\`] WHERE (\`genre\`.name = $filter.interfacedRelationshipType.Genre.name))))) RETURN \`person\` {FRAGMENT_TYPE: head( [ label IN labels(\`person\`) WHERE label IN $Person_derivedTypes ] ), .userId , .name ,interfacedRelationshipType: [(\`person\`)-[\`person_interfacedRelationshipType_relation\`:\`INTERFACED_RELATIONSHIP_TYPE\`]->(:\`Genre\`) WHERE (\`person_interfacedRelationshipType_relation\`.string = $_1_filter.string) | person_interfacedRelationshipType_relation { .string ,Genre: head([(:\`Person\`)-[\`person_interfacedRelationshipType_relation\`]->(\`person_interfacedRelationshipType_Genre\`:\`Genre\`) | person_interfacedRelationshipType_Genre { .name }]) }] } AS \`person\``,
     expectedParams = {
       offset: 0,
       first: -1,
@@ -3418,7 +3418,7 @@ test('fliter interfaced relationship type field for outgoing object type nodes',
           }
         }
       },
-      '1_filter': {
+      _1_filter: {
         string: 'data'
       },
       cypherParams: CYPHER_PARAMS,
@@ -3522,7 +3522,7 @@ test('fliter interfaced relationship type field for incoming interface type node
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`genre\`:\`Genre\`) WHERE (EXISTS((\`genre\`)<-[:INTERFACED_RELATIONSHIP_TYPE]-(:Person)) AND ALL(\`genre_filter_person\` IN [(\`genre\`)<-[\`_genre_filter_person\`:INTERFACED_RELATIONSHIP_TYPE]-(:Person) | \`_genre_filter_person\`] WHERE (ALL(\`person\` IN [(\`genre\`)<-[\`genre_filter_person\`]-(\`_person\`:Person) | \`_person\`] WHERE (\`person\`.userId = $filter.interfacedRelationshipType.Person.userId))))) RETURN \`genre\` { .name ,interfacedRelationshipType: [(\`genre\`)<-[\`genre_interfacedRelationshipType_relation\`:\`INTERFACED_RELATIONSHIP_TYPE\`]-(:\`Person\`) WHERE (\`genre_interfacedRelationshipType_relation\`.string = $1_filter.string) AND (ALL(\`genre_filter_person\` IN [(\`genre\`)<-[\`genre_interfacedRelationshipType_relation\`]-(\`_person\`:Person) | \`_person\`] WHERE (\`genre_filter_person\`.name IN $1_filter.Person.name_in))) | genre_interfacedRelationshipType_relation { .string ,Person: head([(:\`Genre\`)<-[\`genre_interfacedRelationshipType_relation\`]-(\`genre_interfacedRelationshipType_Person\`:\`Person\`) | genre_interfacedRelationshipType_Person {FRAGMENT_TYPE: head( [ label IN labels(genre_interfacedRelationshipType_Person) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]) }] } AS \`genre\``,
+    expectedCypherQuery = `MATCH (\`genre\`:\`Genre\`) WHERE (EXISTS((\`genre\`)<-[:INTERFACED_RELATIONSHIP_TYPE]-(:Person)) AND ALL(\`genre_filter_person\` IN [(\`genre\`)<-[\`_genre_filter_person\`:INTERFACED_RELATIONSHIP_TYPE]-(:Person) | \`_genre_filter_person\`] WHERE (ALL(\`person\` IN [(\`genre\`)<-[\`genre_filter_person\`]-(\`_person\`:Person) | \`_person\`] WHERE (\`person\`.userId = $filter.interfacedRelationshipType.Person.userId))))) RETURN \`genre\` { .name ,interfacedRelationshipType: [(\`genre\`)<-[\`genre_interfacedRelationshipType_relation\`:\`INTERFACED_RELATIONSHIP_TYPE\`]-(:\`Person\`) WHERE (\`genre_interfacedRelationshipType_relation\`.string = $_1_filter.string) AND (ALL(\`genre_filter_person\` IN [(\`genre\`)<-[\`genre_interfacedRelationshipType_relation\`]-(\`_person\`:Person) | \`_person\`] WHERE (\`genre_filter_person\`.name IN $_1_filter.Person.name_in))) | genre_interfacedRelationshipType_relation { .string ,Person: head([(:\`Genre\`)<-[\`genre_interfacedRelationshipType_relation\`]-(\`genre_interfacedRelationshipType_Person\`:\`Person\`) | genre_interfacedRelationshipType_Person {FRAGMENT_TYPE: head( [ label IN labels(genre_interfacedRelationshipType_Person) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]) }] } AS \`genre\``,
     expectedParams = {
       offset: 0,
       first: -1,
@@ -3533,7 +3533,7 @@ test('fliter interfaced relationship type field for incoming interface type node
           }
         }
       },
-      '1_filter': {
+      _1_filter: {
         string: 'data',
         Person: {
           name_in: ['Michael']
@@ -3644,11 +3644,11 @@ test('filter incoming interface type nodes using only fragments in relationship 
     }
   }
   `,
-    expectedCypherQuery = `MATCH (\`genre\`:\`Genre\`) RETURN \`genre\` { .name ,interfacedRelationshipType: [(\`genre\`)<-[\`genre_interfacedRelationshipType_relation\`:\`INTERFACED_RELATIONSHIP_TYPE\`]-(:\`Person\`) WHERE (ALL(\`genre_filter_person\` IN [(\`genre\`)<-[\`genre_interfacedRelationshipType_relation\`]-(\`_person\`:Person) | \`_person\`] WHERE (NOT \`genre_filter_person\`.name IN $1_filter.Person.name_not_in))) | genre_interfacedRelationshipType_relation { .string ,Person: head([(:\`Genre\`)<-[\`genre_interfacedRelationshipType_relation\`]-(\`genre_interfacedRelationshipType_Person\`:\`Person\`) WHERE ("User" IN labels(genre_interfacedRelationshipType_Person)) | head([\`genre_interfacedRelationshipType_Person\` IN [\`genre_interfacedRelationshipType_Person\`] WHERE "User" IN labels(\`genre_interfacedRelationshipType_Person\`) | \`genre_interfacedRelationshipType_Person\` { FRAGMENT_TYPE: "User",  .userId  }])]) }] } AS \`genre\``,
+    expectedCypherQuery = `MATCH (\`genre\`:\`Genre\`) RETURN \`genre\` { .name ,interfacedRelationshipType: [(\`genre\`)<-[\`genre_interfacedRelationshipType_relation\`:\`INTERFACED_RELATIONSHIP_TYPE\`]-(:\`Person\`) WHERE (ALL(\`genre_filter_person\` IN [(\`genre\`)<-[\`genre_interfacedRelationshipType_relation\`]-(\`_person\`:Person) | \`_person\`] WHERE (NOT \`genre_filter_person\`.name IN $_1_filter.Person.name_not_in))) | genre_interfacedRelationshipType_relation { .string ,Person: head([(:\`Genre\`)<-[\`genre_interfacedRelationshipType_relation\`]-(\`genre_interfacedRelationshipType_Person\`:\`Person\`) WHERE ("User" IN labels(genre_interfacedRelationshipType_Person)) | head([\`genre_interfacedRelationshipType_Person\` IN [\`genre_interfacedRelationshipType_Person\`] WHERE "User" IN labels(\`genre_interfacedRelationshipType_Person\`) | \`genre_interfacedRelationshipType_Person\` { FRAGMENT_TYPE: "User",  .userId  }])]) }] } AS \`genre\``,
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_filter': {
+      _1_filter: {
         Person: {
           name_not_in: ['John']
         }
@@ -3786,7 +3786,7 @@ test('filter reflexive interfaced relationship type field', t => {
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`person\`:\`Person\`) WHERE (\`person\`.name IN $filter.name_in) AND ((EXISTS((\`person\`)-[:REFLEXIVE_INTERFACED_RELATIONSHIP_TYPE]->(:Person)) AND ALL(\`person_filter_person\` IN [(\`person\`)-[\`_person_filter_person\`:REFLEXIVE_INTERFACED_RELATIONSHIP_TYPE]->(:Person) | \`_person_filter_person\`] WHERE (ALL(\`person\` IN [(\`person\`)-[\`person_filter_person\`]->(\`_person\`:Person) | \`_person\`] WHERE (\`person\`.name IN $filter.reflexiveInterfacedRelationshipType.to.Person.name_in)))))) RETURN \`person\` {FRAGMENT_TYPE: head( [ label IN labels(\`person\`) WHERE label IN $Person_derivedTypes ] ), .userId , .name ,reflexiveInterfacedRelationshipType: {to: [(\`person\`)-[\`person_to_relation\`:\`REFLEXIVE_INTERFACED_RELATIONSHIP_TYPE\`]->(\`person_to\`:\`Person\`) WHERE (\`person_to_relation\`.boolean = $1_filter.boolean) | person_to_relation { .boolean ,Person: person_to {FRAGMENT_TYPE: head( [ label IN labels(person_to) WHERE label IN $Person_derivedTypes ] ), .userId , .name ,interfacedRelationshipType: [(\`person_to\`)-[\`person_to_interfacedRelationshipType_relation\`:\`INTERFACED_RELATIONSHIP_TYPE\`]->(:\`Genre\`) | person_to_interfacedRelationshipType_relation { .string ,Genre: head([(:\`Person\`)-[\`person_to_interfacedRelationshipType_relation\`]->(\`person_to_interfacedRelationshipType_Genre\`:\`Genre\`) | person_to_interfacedRelationshipType_Genre { .name }]) }][..1] } }][0..1] } } AS \`person\``,
+    expectedCypherQuery = `MATCH (\`person\`:\`Person\`) WHERE (\`person\`.name IN $filter.name_in) AND ((EXISTS((\`person\`)-[:REFLEXIVE_INTERFACED_RELATIONSHIP_TYPE]->(:Person)) AND ALL(\`person_filter_person\` IN [(\`person\`)-[\`_person_filter_person\`:REFLEXIVE_INTERFACED_RELATIONSHIP_TYPE]->(:Person) | \`_person_filter_person\`] WHERE (ALL(\`person\` IN [(\`person\`)-[\`person_filter_person\`]->(\`_person\`:Person) | \`_person\`] WHERE (\`person\`.name IN $filter.reflexiveInterfacedRelationshipType.to.Person.name_in)))))) RETURN \`person\` {FRAGMENT_TYPE: head( [ label IN labels(\`person\`) WHERE label IN $Person_derivedTypes ] ), .userId , .name ,reflexiveInterfacedRelationshipType: {to: [(\`person\`)-[\`person_to_relation\`:\`REFLEXIVE_INTERFACED_RELATIONSHIP_TYPE\`]->(\`person_to\`:\`Person\`) WHERE (\`person_to_relation\`.boolean = $_1_filter.boolean) | person_to_relation { .boolean ,Person: person_to {FRAGMENT_TYPE: head( [ label IN labels(person_to) WHERE label IN $Person_derivedTypes ] ), .userId , .name ,interfacedRelationshipType: [(\`person_to\`)-[\`person_to_interfacedRelationshipType_relation\`:\`INTERFACED_RELATIONSHIP_TYPE\`]->(:\`Genre\`) | person_to_interfacedRelationshipType_relation { .string ,Genre: head([(:\`Person\`)-[\`person_to_interfacedRelationshipType_relation\`]->(\`person_to_interfacedRelationshipType_Genre\`:\`Genre\`) | person_to_interfacedRelationshipType_Genre { .name }]) }][..1] } }][0..1] } } AS \`person\``,
     expectedParams = {
       offset: 0,
       first: -1,
@@ -3800,7 +3800,7 @@ test('filter reflexive interfaced relationship type field', t => {
           }
         }
       },
-      '1_filter': {
+      _1_filter: {
         boolean: true
       },
       '1_first': 1,
@@ -7541,14 +7541,14 @@ test('Query relationship type using list field filters', t => {
     }
   }  
   `,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) WHERE ($filter._ratings_not_null = TRUE AND EXISTS((\`movie\`)<-[:RATED]-(:User))) RETURN \`movie\` {_id: ID(\`movie\`), .titles ,ratings: [(\`movie\`)<-[\`movie_ratings_relation\`:\`RATED\`]-(:\`User\`) WHERE ((size(\`movie_ratings_relation\`.ratings) > 0)) AND ([value IN $1_filter.ratings WHERE value IN \`movie_ratings_relation\`.ratings]) AND ([value IN $1_filter.ratings_lt WHERE [prop IN \`movie_ratings_relation\`.ratings WHERE prop < value]]) AND ([value IN $1_filter.ratings_gt WHERE [prop IN \`movie_ratings_relation\`.ratings WHERE prop > value]]) AND ([value IN $1_filter.ratings_lte WHERE [prop IN \`movie_ratings_relation\`.ratings WHERE prop <= value]]) AND ([value IN $1_filter.ratings_gte WHERE [prop IN \`movie_ratings_relation\`.ratings WHERE prop >= value]]) AND ([value IN $1_filter.datetimes WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.hour IS NULL OR prop.hour = value.hour) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]]) AND (NONE(value IN $1_filter.datetimes_not WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.year IS NULL OR prop.year = value.year))])) AND ([value IN $1_filter.datetimes_lt WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.day IS NULL OR prop.day < value.day))]]) AND ([value IN $1_filter.datetimes_lte WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.day IS NULL OR prop.day <= value.day))]]) AND ([value IN $1_filter.datetimes_gt WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.hour IS NULL OR prop.hour > value.hour) AND (value.minute IS NULL OR prop.minute > value.minute))]]) AND ([value IN $1_filter.datetimes_gte WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.hour IS NULL OR prop.hour >= value.hour))]]) | movie_ratings_relation { .ratings ,datetimes: reduce(a = [], INSTANCE IN movie_ratings_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , hour: INSTANCE.hour , minute: INSTANCE.minute , second: INSTANCE.second , formatted: toString(INSTANCE) })}] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) WHERE ($filter._ratings_not_null = TRUE AND EXISTS((\`movie\`)<-[:RATED]-(:User))) RETURN \`movie\` {_id: ID(\`movie\`), .titles ,ratings: [(\`movie\`)<-[\`movie_ratings_relation\`:\`RATED\`]-(:\`User\`) WHERE ((size(\`movie_ratings_relation\`.ratings) > 0)) AND ([value IN $_1_filter.ratings WHERE value IN \`movie_ratings_relation\`.ratings]) AND ([value IN $_1_filter.ratings_lt WHERE [prop IN \`movie_ratings_relation\`.ratings WHERE prop < value]]) AND ([value IN $_1_filter.ratings_gt WHERE [prop IN \`movie_ratings_relation\`.ratings WHERE prop > value]]) AND ([value IN $_1_filter.ratings_lte WHERE [prop IN \`movie_ratings_relation\`.ratings WHERE prop <= value]]) AND ([value IN $_1_filter.ratings_gte WHERE [prop IN \`movie_ratings_relation\`.ratings WHERE prop >= value]]) AND ([value IN $_1_filter.datetimes WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.hour IS NULL OR prop.hour = value.hour) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]]) AND (NONE(value IN $_1_filter.datetimes_not WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.year IS NULL OR prop.year = value.year))])) AND ([value IN $_1_filter.datetimes_lt WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.day IS NULL OR prop.day < value.day))]]) AND ([value IN $_1_filter.datetimes_lte WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.day IS NULL OR prop.day <= value.day))]]) AND ([value IN $_1_filter.datetimes_gt WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.hour IS NULL OR prop.hour > value.hour) AND (value.minute IS NULL OR prop.minute > value.minute))]]) AND ([value IN $_1_filter.datetimes_gte WHERE [prop IN \`movie_ratings_relation\`.datetimes WHERE ((value.hour IS NULL OR prop.hour >= value.hour))]]) | movie_ratings_relation { .ratings ,datetimes: reduce(a = [], INSTANCE IN movie_ratings_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , hour: INSTANCE.hour , minute: INSTANCE.minute , second: INSTANCE.second , formatted: toString(INSTANCE) })}] } AS \`movie\``,
     expectedParams = {
       offset: 0,
       first: -1,
       filter: {
         _ratings_not_null: true
       },
-      '1_filter': {
+      _1_filter: {
         ratings_not: [],
         ratings: [5],
         ratings_lt: [6],
@@ -9591,14 +9591,14 @@ test('filtering used on root and nested interface type field with only fragments
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`camera\`:\`Camera\`) WHERE ("NewCamera" IN labels(\`camera\`)) AND ($filter._operators_not_null = TRUE AND EXISTS((\`camera\`)<-[:cameras]-(:Person))) RETURN head([\`camera\` IN [\`camera\`] WHERE "NewCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "NewCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE ("CameraMan" IN labels(\`camera_operators\`)) AND ($1_filter._name_not_null = TRUE AND EXISTS(\`camera_operators\`.name)) | head([\`camera_operators\` IN [\`camera_operators\`] WHERE "CameraMan" IN labels(\`camera_operators\`) | \`camera_operators\` { FRAGMENT_TYPE: "CameraMan",  .name  }])]  }]) AS \`camera\``,
+    expectedCypherQuery = `MATCH (\`camera\`:\`Camera\`) WHERE ("NewCamera" IN labels(\`camera\`)) AND ($filter._operators_not_null = TRUE AND EXISTS((\`camera\`)<-[:cameras]-(:Person))) RETURN head([\`camera\` IN [\`camera\`] WHERE "NewCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "NewCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE ("CameraMan" IN labels(\`camera_operators\`)) AND ($_1_filter._name_not_null = TRUE AND EXISTS(\`camera_operators\`.name)) | head([\`camera_operators\` IN [\`camera_operators\`] WHERE "CameraMan" IN labels(\`camera_operators\`) | \`camera_operators\` { FRAGMENT_TYPE: "CameraMan",  .name  }])]  }]) AS \`camera\``,
     expectedParams = {
       offset: 0,
       first: -1,
       filter: {
         _operators_not_null: true
       },
-      '1_filter': {
+      _1_filter: {
         _name_not_null: true
       },
       cypherParams: CYPHER_PARAMS
@@ -9648,12 +9648,12 @@ test('filtering used on root and nested interface using fragments and query vari
       },
       computedOperatorName: 'Johnnie Zoom'
     },
-    expectedCypherQuery = `MATCH (\`camera\`:\`Camera\` {type:$type}) WHERE ("NewCamera" IN labels(\`camera\`) OR "OldCamera" IN labels(\`camera\`)) RETURN head([\`camera\` IN [\`camera\`] WHERE "NewCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "NewCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE (\`camera_operators\`.userId = $1_filter.userId) | \`camera_operators\` {FRAGMENT_TYPE: head( [ label IN labels(\`camera_operators\`) WHERE label IN $Person_derivedTypes ] ), .userId }] , .id , .type ,computedOperators: [ camera_computedOperators IN apoc.cypher.runFirstColumn("MATCH (this)<-[:cameras]-(p:Person) RETURN p", {this: camera, cypherParams: $cypherParams, name: $3_name}, true) | camera_computedOperators {FRAGMENT_TYPE: head( [ label IN labels(camera_computedOperators) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]  }] + [\`camera\` IN [\`camera\`] WHERE "OldCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "OldCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE (\`camera_operators\`.userId = $1_filter.userId) | \`camera_operators\` {FRAGMENT_TYPE: head( [ label IN labels(\`camera_operators\`) WHERE label IN $Person_derivedTypes ] ), .userId }] , .id , .type ,computedOperators: [ camera_computedOperators IN apoc.cypher.runFirstColumn("MATCH (this)<-[:cameras]-(p:Person) RETURN p", {this: camera, cypherParams: $cypherParams, name: $3_name}, true) | camera_computedOperators {FRAGMENT_TYPE: head( [ label IN labels(camera_computedOperators) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]  }]) AS \`camera\``,
+    expectedCypherQuery = `MATCH (\`camera\`:\`Camera\` {type:$type}) WHERE ("NewCamera" IN labels(\`camera\`) OR "OldCamera" IN labels(\`camera\`)) RETURN head([\`camera\` IN [\`camera\`] WHERE "NewCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "NewCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE (\`camera_operators\`.userId = $_1_filter.userId) | \`camera_operators\` {FRAGMENT_TYPE: head( [ label IN labels(\`camera_operators\`) WHERE label IN $Person_derivedTypes ] ), .userId }] , .id , .type ,computedOperators: [ camera_computedOperators IN apoc.cypher.runFirstColumn("MATCH (this)<-[:cameras]-(p:Person) RETURN p", {this: camera, cypherParams: $cypherParams, name: $3_name}, true) | camera_computedOperators {FRAGMENT_TYPE: head( [ label IN labels(camera_computedOperators) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]  }] + [\`camera\` IN [\`camera\`] WHERE "OldCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "OldCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE (\`camera_operators\`.userId = $_1_filter.userId) | \`camera_operators\` {FRAGMENT_TYPE: head( [ label IN labels(\`camera_operators\`) WHERE label IN $Person_derivedTypes ] ), .userId }] , .id , .type ,computedOperators: [ camera_computedOperators IN apoc.cypher.runFirstColumn("MATCH (this)<-[:cameras]-(p:Person) RETURN p", {this: camera, cypherParams: $cypherParams, name: $3_name}, true) | camera_computedOperators {FRAGMENT_TYPE: head( [ label IN labels(camera_computedOperators) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]  }]) AS \`camera\``,
     expectedParams = {
       offset: 0,
       first: -1,
       type: 'macro',
-      '1_filter': {
+      _1_filter: {
         userId: 'man001'
       },
       '3_name': 'Johnnie Zoom',
@@ -12823,7 +12823,7 @@ test('Filter relationship using regexp filter on String type field', t => {
     }
   }
   `,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) WHERE (\`movie\`.title =~ $filter.title_regexp) AND (EXISTS((\`movie\`)<-[:ACTED_IN]-(:Actor)) AND ALL(\`actor\` IN [(\`movie\`)<-[:ACTED_IN]-(\`_actor\`:Actor) | \`_actor\`] WHERE (\`actor\`.name =~ $filter.actors.name_regexp))) AND ([value IN $filter.titles_regexp WHERE [prop IN \`movie\`.titles WHERE prop =~ value]]) RETURN \`movie\` {_id: ID(\`movie\`), .title , .titles ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) WHERE (\`movie_actors\`.name =~ $1_filter.name_regexp) | \`movie_actors\` { .name }] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) WHERE (\`movie\`.title =~ $filter.title_regexp) AND (EXISTS((\`movie\`)<-[:ACTED_IN]-(:Actor)) AND ALL(\`actor\` IN [(\`movie\`)<-[:ACTED_IN]-(\`_actor\`:Actor) | \`_actor\`] WHERE (\`actor\`.name =~ $filter.actors.name_regexp))) AND ([value IN $filter.titles_regexp WHERE [prop IN \`movie\`.titles WHERE prop =~ value]]) RETURN \`movie\` {_id: ID(\`movie\`), .title , .titles ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) WHERE (\`movie_actors\`.name =~ $_1_filter.name_regexp) | \`movie_actors\` { .name }] } AS \`movie\``,
     expectedParams = {
       offset: 0,
       first: -1,
@@ -12834,7 +12834,7 @@ test('Filter relationship using regexp filter on String type field', t => {
         },
         titles_regexp: '(?i)word'
       },
-      '1_filter': {
+      _1_filter: {
         name_regexp: ''
       },
       cypherParams: CYPHER_PARAMS

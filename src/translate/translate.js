@@ -420,6 +420,7 @@ export const relationTypeFieldOnNodeType = ({
     }| ${relationshipVariableName} {${subSelection[0]}}]${rhsOrdering}${
       !isArrayType(fieldType) ? ')' : ''
     }${skipLimit} ${commaIfTail}`;
+    debugger;
   }
 
   tailParams.initial = translation;
@@ -1573,7 +1574,7 @@ export const processFilterArgument = ({
     ? params[argumentName]
     : undefined;
   const filterParamKey =
-    paramIndex > 1 ? `${paramIndex - 1}_${argumentName}` : argumentName;
+    paramIndex > 1 ? `_${paramIndex - 1}_${argumentName}` : argumentName;
   const filterCypherParam = `$${filterParamKey}`;
   let translations = [];
   // allows an exception for the existence of the filter argument AST
