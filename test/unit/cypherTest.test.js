@@ -81,10 +81,10 @@ test('Cypher projection skip limit', t => {
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) | \`movie_actors\` { .name }] ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $1_first}, true) | movie_similar { .title }][..3] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) | \`movie_actors\` { .name }] ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $_1_first}, true) | movie_similar { .title }][..3] } AS \`movie\``,
     expectedParams = {
       title: 'River Runs Through It, A',
-      '1_first': 3,
+      _1_first: 3,
       first: -1,
       cypherParams: CYPHER_PARAMS,
       offset: 0
@@ -275,11 +275,11 @@ test('Deeply nested object query', t => {
     }
   }
 }`,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) | \`movie_actors\` { .name ,movies: [(\`movie_actors\`)-[:\`ACTED_IN\`]->(\`movie_actors_movies\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | \`movie_actors_movies\` { .title ,actors: [(\`movie_actors_movies\`)<-[:\`ACTED_IN\`]-(\`movie_actors_movies_actors\`:\`Actor\`{name:$1_name}) | \`movie_actors_movies_actors\` { .name ,movies: [(\`movie_actors_movies_actors\`)-[:\`ACTED_IN\`]->(\`movie_actors_movies_actors_movies\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | \`movie_actors_movies_actors_movies\` { .title , .year ,similar: [ movie_actors_movies_actors_movies_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie_actors_movies_actors_movies, cypherParams: $cypherParams, offset: 0, first: $2_first}, true) | movie_actors_movies_actors_movies_similar { .title , .year }][..3] }] }] }] }] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) | \`movie_actors\` { .name ,movies: [(\`movie_actors\`)-[:\`ACTED_IN\`]->(\`movie_actors_movies\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | \`movie_actors_movies\` { .title ,actors: [(\`movie_actors_movies\`)<-[:\`ACTED_IN\`]-(\`movie_actors_movies_actors\`:\`Actor\`{name:$_1_name}) | \`movie_actors_movies_actors\` { .name ,movies: [(\`movie_actors_movies_actors\`)-[:\`ACTED_IN\`]->(\`movie_actors_movies_actors_movies\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | \`movie_actors_movies_actors_movies\` { .title , .year ,similar: [ movie_actors_movies_actors_movies_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie_actors_movies_actors_movies, cypherParams: $cypherParams, offset: 0, first: $_2_first}, true) | movie_actors_movies_actors_movies_similar { .title , .year }][..3] }] }] }] }] } AS \`movie\``,
     expectedParams = {
       title: 'River Runs Through It, A',
-      '1_name': 'Tom Hanks',
-      '2_first': 3,
+      _1_name: 'Tom Hanks',
+      _2_first: 3,
       first: -1,
       cypherParams: CYPHER_PARAMS,
       offset: 0
@@ -454,13 +454,13 @@ test('Pass @cypher directive params to sub-query', t => {
     }
 
   }`,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` {scaleRating: apoc.cypher.runFirstColumn("WITH $this AS this RETURN $scale * this.imdbRating", {this: movie, cypherParams: $cypherParams, scale: $1_scale}, false)} AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` {scaleRating: apoc.cypher.runFirstColumn("WITH $this AS this RETURN $scale * this.imdbRating", {this: movie, cypherParams: $cypherParams, scale: $_1_scale}, false)} AS \`movie\``,
     expectedParams = {
       first: -1,
       cypherParams: CYPHER_PARAMS,
       offset: 0,
       title: 'River Runs Through It, A',
-      '1_scale': 10
+      _1_scale: 10
     };
 
   t.plan(4);
@@ -719,14 +719,14 @@ test('Cypher subquery filters', t => {
         }
       }
     }`,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`{name:$1_name}) | \`movie_actors\` { .name }] ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $3_first}, true) | movie_similar { .title }][..3] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`{name:$_1_name}) | \`movie_actors\` { .name }] ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $_3_first}, true) | movie_similar { .title }][..3] } AS \`movie\``,
     expectedParams = {
       title: 'River Runs Through It, A',
       first: -1,
       cypherParams: CYPHER_PARAMS,
       offset: 0,
-      '1_name': 'Tom Hanks',
-      '3_first': 3
+      _1_name: 'Tom Hanks',
+      _3_first: 3
     };
 
   t.plan(4);
@@ -790,15 +790,15 @@ test('Cypher subquery filters with paging', t => {
         }
       }
     }`,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`{name:$1_name}) | \`movie_actors\` { .name }][..3] ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $3_first}, true) | movie_similar { .title }][..3] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {title:$title}) RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`{name:$_1_name}) | \`movie_actors\` { .name }][..3] ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $_3_first}, true) | movie_similar { .title }][..3] } AS \`movie\``,
     expectedParams = {
       title: 'River Runs Through It, A',
       cypherParams: CYPHER_PARAMS,
       first: -1,
       offset: 0,
-      '1_first': 3,
-      '1_name': 'Tom Hanks',
-      '3_first': 3
+      _1_first: 3,
+      _1_name: 'Tom Hanks',
+      _3_first: 3
     };
 
   t.plan(4);
@@ -830,7 +830,7 @@ test('Handle @cypher directive on Query Type', t => {
       substring: 'Action',
       first: -1,
       offset: 0,
-      '1_first': 3,
+      _1_first: 3,
       cypherParams: CYPHER_PARAMS
     };
 
@@ -2408,9 +2408,9 @@ test('Handle GraphQL variables in nested selection - first/offset', t => {
       year: 2016,
       first: 3
     },
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {year:$year}) RETURN \`movie\` { .title , .year ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $1_first}, true) | movie_similar { .title }][..3] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {year:$year}) RETURN \`movie\` { .title , .year ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $_1_first}, true) | movie_similar { .title }][..3] } AS \`movie\``,
     expectedParams = {
-      '1_first': 3,
+      _1_first: 3,
       cypherParams: CYPHER_PARAMS,
       year: 2016,
       first: -1,
@@ -2453,13 +2453,13 @@ test('Handle GraphQL variables in nest selection - @cypher param (not first/offs
       first: 3,
       scale: 5
     },
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {year:$year}) RETURN \`movie\` { .title , .year ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $1_first}, true) | movie_similar { .title ,scaleRating: apoc.cypher.runFirstColumn("WITH $this AS this RETURN $scale * this.imdbRating", {this: movie_similar, cypherParams: $cypherParams, scale: $2_scale}, false)}][..3] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS} {year:$year}) RETURN \`movie\` { .title , .year ,similar: [ movie_similar IN apoc.cypher.runFirstColumn("WITH {this} AS this MATCH (this)--(:Genre)--(o:Movie) RETURN o", {this: movie, cypherParams: $cypherParams, offset: 0, first: $_1_first}, true) | movie_similar { .title ,scaleRating: apoc.cypher.runFirstColumn("WITH $this AS this RETURN $scale * this.imdbRating", {this: movie_similar, cypherParams: $cypherParams, scale: $_2_scale}, false)}][..3] } AS \`movie\``,
     expectedParams = {
       year: 2016,
       first: -1,
       offset: 0,
-      '1_first': 3,
-      '2_scale': 5,
+      _1_first: 3,
+      _2_scale: 5,
       cypherParams: CYPHER_PARAMS
     };
 
@@ -2816,7 +2816,7 @@ test('orderBy test - descending, top level - augmented schema', t => {
       offset: 0,
       first: 10,
       year: 2010,
-      '1_first': 3,
+      _1_first: 3,
       cypherParams: CYPHER_PARAMS
     };
 
@@ -2879,7 +2879,7 @@ test('query relationship properties and order by unselected field', t => {
       offset: 0,
       first: -1,
       title: 'River Runs Through It, A',
-      '1_orderBy': ['datetime_asc'],
+      _1_orderBy: ['datetime_asc'],
       cypherParams: CYPHER_PARAMS
     };
 
@@ -2910,7 +2910,7 @@ test('query relationship properties and order by internal ID', t => {
       offset: 0,
       first: -1,
       title: 'River Runs Through It, A',
-      '1_orderBy': ['_id_asc'],
+      _1_orderBy: ['_id_asc'],
       cypherParams: CYPHER_PARAMS
     };
 
@@ -3082,11 +3082,11 @@ test('query relation type with argument', t => {
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` {_id: ID(\`user\`), .name ,rated: [(\`user\`)-[\`user_rated_relation\`:\`RATED\`{rating:$1_rating}]->(:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | user_rated_relation { .rating ,Movie: head([(:\`User\`)-[\`user_rated_relation\`]->(\`user_rated_Movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | user_rated_Movie { .title }]) }] } AS \`user\``,
+    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` {_id: ID(\`user\`), .name ,rated: [(\`user\`)-[\`user_rated_relation\`:\`RATED\`{rating:$_1_rating}]->(:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | user_rated_relation { .rating ,Movie: head([(:\`User\`)-[\`user_rated_relation\`]->(\`user_rated_Movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | user_rated_Movie { .title }]) }] } AS \`user\``,
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_rating': 5,
+      _1_rating: 5,
       cypherParams: CYPHER_PARAMS
     };
 
@@ -3122,13 +3122,13 @@ test('query reflexive relation type with arguments', t => {
     }
   }
   `,
-    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` { .userId , .name ,friends: {from: [(\`user\`)<-[\`user_from_relation\`:\`FRIEND_OF\`{since:$1_since}]-(\`user_from\`:\`User\`) | user_from_relation { .since ,User: user_from { .name } }] ,to: [(\`user\`)-[\`user_to_relation\`:\`FRIEND_OF\`{since:$3_since}]->(\`user_to\`:\`User\`) | user_to_relation { .since ,User: user_to { .name } }] } } AS \`user\``,
+    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` { .userId , .name ,friends: {from: [(\`user\`)<-[\`user_from_relation\`:\`FRIEND_OF\`{since:$_1_since}]-(\`user_from\`:\`User\`) | user_from_relation { .since ,User: user_from { .name } }] ,to: [(\`user\`)-[\`user_to_relation\`:\`FRIEND_OF\`{since:$_3_since}]->(\`user_to\`:\`User\`) | user_to_relation { .since ,User: user_to { .name } }] } } AS \`user\``,
     expectedParams = {
       offset: 0,
       first: -1,
       cypherParams: CYPHER_PARAMS,
-      '1_since': 3,
-      '3_since': 5
+      _1_since: 3,
+      _3_since: 5
     };
 
   t.plan(2);
@@ -3199,8 +3199,8 @@ test('query interfaced relation using inline fragment and pagination', t => {
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_first': 0,
-      '1_offset': 1,
+      _1_first: 0,
+      _1_offset: 1,
       cypherParams: CYPHER_PARAMS
     };
 
@@ -3236,7 +3236,7 @@ test('order interfaced relation using inline fragment', t => {
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': 'userId_asc',
+      _1_orderBy: 'userId_asc',
       cypherParams: CYPHER_PARAMS
     };
 
@@ -3272,8 +3272,8 @@ test('query interfaced relationship type using inline fragment and pagination', 
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_first': 0,
-      '1_offset': 1,
+      _1_first: 0,
+      _1_offset: 1,
       cypherParams: CYPHER_PARAMS
     };
 
@@ -3309,7 +3309,7 @@ test('order interfaced relationship type using inline fragment', t => {
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': ['string_desc'],
+      _1_orderBy: ['string_desc'],
       cypherParams: CYPHER_PARAMS
     };
 
@@ -3371,7 +3371,7 @@ test('order interfaced relationship type field for outgoing object type nodes', 
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': ['string_asc'],
+      _1_orderBy: ['string_asc'],
       cypherParams: CYPHER_PARAMS,
       Person_derivedTypes: ['Actor', 'CameraMan', 'User']
     };
@@ -3483,7 +3483,7 @@ test('order interfaced relationship type field for incoming interface type nodes
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': 'string_desc',
+      _1_orderBy: 'string_desc',
       Person_derivedTypes: ['Actor', 'CameraMan', 'User'],
       cypherParams: CYPHER_PARAMS
     };
@@ -3614,7 +3614,7 @@ test('order incoming interface type nodes using fragments in relationship type f
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': 'string_asc',
+      _1_orderBy: 'string_asc',
       cypherParams: CYPHER_PARAMS
     };
 
@@ -3735,8 +3735,8 @@ test('order incoming and outgoing nodes of reflexive interfaced relationship typ
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': 'boolean_desc',
-      '3_orderBy': 'boolean_asc',
+      _1_orderBy: 'boolean_desc',
+      _3_orderBy: 'boolean_asc',
       cypherParams: CYPHER_PARAMS,
       Person_derivedTypes: ['Actor', 'CameraMan', 'User']
     };
@@ -3803,9 +3803,9 @@ test('filter reflexive interfaced relationship type field', t => {
       _1_filter: {
         boolean: true
       },
-      '1_first': 1,
-      '1_offset': 0,
-      '2_first': 1,
+      _1_first: 1,
+      _1_offset: 0,
+      _2_first: 1,
       Person_derivedTypes: ['Actor', 'CameraMan', 'User'],
       cypherParams: CYPHER_PARAMS
     };
@@ -4501,7 +4501,7 @@ test('Nested Query with temporal property arguments', t => {
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`temporalNode\`:\`TemporalNode\`) WHERE \`temporalNode\`.datetime.year = $datetime.year AND \`temporalNode\`.datetime.month = $datetime.month AND \`temporalNode\`.datetime.day = $datetime.day AND \`temporalNode\`.datetime.hour = $datetime.hour AND \`temporalNode\`.datetime.minute = $datetime.minute AND \`temporalNode\`.datetime.second = $datetime.second AND \`temporalNode\`.datetime.millisecond = $datetime.millisecond AND \`temporalNode\`.datetime.microsecond = $datetime.microsecond AND \`temporalNode\`.datetime.nanosecond = $datetime.nanosecond AND \`temporalNode\`.datetime.timezone = $datetime.timezone RETURN \`temporalNode\` {_id: ID(\`temporalNode\`),time: { hour: \`temporalNode\`.time.hour , minute: \`temporalNode\`.time.minute , second: \`temporalNode\`.time.second , millisecond: \`temporalNode\`.time.millisecond , microsecond: \`temporalNode\`.time.microsecond , nanosecond: \`temporalNode\`.time.nanosecond , timezone: \`temporalNode\`.time.timezone , formatted: toString(\`temporalNode\`.time) },date: { year: \`temporalNode\`.date.year , month: \`temporalNode\`.date.month , day: \`temporalNode\`.date.day , formatted: toString(\`temporalNode\`.date) },datetime: { year: \`temporalNode\`.datetime.year , month: \`temporalNode\`.datetime.month , day: \`temporalNode\`.datetime.day , hour: \`temporalNode\`.datetime.hour , minute: \`temporalNode\`.datetime.minute , second: \`temporalNode\`.datetime.second , millisecond: \`temporalNode\`.datetime.millisecond , microsecond: \`temporalNode\`.datetime.microsecond , nanosecond: \`temporalNode\`.datetime.nanosecond , timezone: \`temporalNode\`.datetime.timezone , formatted: toString(\`temporalNode\`.datetime) },localtime: { hour: \`temporalNode\`.localtime.hour , minute: \`temporalNode\`.localtime.minute , second: \`temporalNode\`.localtime.second , millisecond: \`temporalNode\`.localtime.millisecond , microsecond: \`temporalNode\`.localtime.microsecond , nanosecond: \`temporalNode\`.localtime.nanosecond , formatted: toString(\`temporalNode\`.localtime) },localdatetime: { year: \`temporalNode\`.localdatetime.year , month: \`temporalNode\`.localdatetime.month , day: \`temporalNode\`.localdatetime.day , hour: \`temporalNode\`.localdatetime.hour , minute: \`temporalNode\`.localdatetime.minute , second: \`temporalNode\`.localdatetime.second , millisecond: \`temporalNode\`.localdatetime.millisecond , microsecond: \`temporalNode\`.localdatetime.microsecond , nanosecond: \`temporalNode\`.localdatetime.nanosecond , formatted: toString(\`temporalNode\`.localdatetime) },temporalNodes: [(\`temporalNode\`)-[:\`TEMPORAL\`]->(\`temporalNode_temporalNodes\`:\`TemporalNode\`) WHERE temporalNode_temporalNodes.datetime.year = $1_datetime.year AND temporalNode_temporalNodes.datetime.month = $1_datetime.month AND temporalNode_temporalNodes.datetime.day = $1_datetime.day AND temporalNode_temporalNodes.datetime.hour = $1_datetime.hour AND temporalNode_temporalNodes.datetime.minute = $1_datetime.minute AND temporalNode_temporalNodes.datetime.second = $1_datetime.second AND temporalNode_temporalNodes.datetime.millisecond = $1_datetime.millisecond AND temporalNode_temporalNodes.datetime.microsecond = $1_datetime.microsecond AND temporalNode_temporalNodes.datetime.nanosecond = $1_datetime.nanosecond AND temporalNode_temporalNodes.datetime.timezone = $1_datetime.timezone AND temporalNode_temporalNodes.localdatetime = localdatetime($1_localdatetime.formatted) | \`temporalNode_temporalNodes\` {_id: ID(\`temporalNode_temporalNodes\`),time: { hour: \`temporalNode_temporalNodes\`.time.hour , minute: \`temporalNode_temporalNodes\`.time.minute , second: \`temporalNode_temporalNodes\`.time.second , millisecond: \`temporalNode_temporalNodes\`.time.millisecond , microsecond: \`temporalNode_temporalNodes\`.time.microsecond , nanosecond: \`temporalNode_temporalNodes\`.time.nanosecond , timezone: \`temporalNode_temporalNodes\`.time.timezone , formatted: toString(\`temporalNode_temporalNodes\`.time) },date: { year: \`temporalNode_temporalNodes\`.date.year , month: \`temporalNode_temporalNodes\`.date.month , day: \`temporalNode_temporalNodes\`.date.day , formatted: toString(\`temporalNode_temporalNodes\`.date) },datetime: { year: \`temporalNode_temporalNodes\`.datetime.year , month: \`temporalNode_temporalNodes\`.datetime.month , day: \`temporalNode_temporalNodes\`.datetime.day , hour: \`temporalNode_temporalNodes\`.datetime.hour , minute: \`temporalNode_temporalNodes\`.datetime.minute , second: \`temporalNode_temporalNodes\`.datetime.second , millisecond: \`temporalNode_temporalNodes\`.datetime.millisecond , microsecond: \`temporalNode_temporalNodes\`.datetime.microsecond , nanosecond: \`temporalNode_temporalNodes\`.datetime.nanosecond , timezone: \`temporalNode_temporalNodes\`.datetime.timezone , formatted: toString(\`temporalNode_temporalNodes\`.datetime) },localtime: { hour: \`temporalNode_temporalNodes\`.localtime.hour , minute: \`temporalNode_temporalNodes\`.localtime.minute , second: \`temporalNode_temporalNodes\`.localtime.second , millisecond: \`temporalNode_temporalNodes\`.localtime.millisecond , microsecond: \`temporalNode_temporalNodes\`.localtime.microsecond , nanosecond: \`temporalNode_temporalNodes\`.localtime.nanosecond , formatted: toString(\`temporalNode_temporalNodes\`.localtime) },localdatetime: { year: \`temporalNode_temporalNodes\`.localdatetime.year , month: \`temporalNode_temporalNodes\`.localdatetime.month , day: \`temporalNode_temporalNodes\`.localdatetime.day , hour: \`temporalNode_temporalNodes\`.localdatetime.hour , minute: \`temporalNode_temporalNodes\`.localdatetime.minute , second: \`temporalNode_temporalNodes\`.localdatetime.second , millisecond: \`temporalNode_temporalNodes\`.localdatetime.millisecond , microsecond: \`temporalNode_temporalNodes\`.localdatetime.microsecond , nanosecond: \`temporalNode_temporalNodes\`.localdatetime.nanosecond , formatted: toString(\`temporalNode_temporalNodes\`.localdatetime) }}] } AS \`temporalNode\``,
+    expectedCypherQuery = `MATCH (\`temporalNode\`:\`TemporalNode\`) WHERE \`temporalNode\`.datetime.year = $datetime.year AND \`temporalNode\`.datetime.month = $datetime.month AND \`temporalNode\`.datetime.day = $datetime.day AND \`temporalNode\`.datetime.hour = $datetime.hour AND \`temporalNode\`.datetime.minute = $datetime.minute AND \`temporalNode\`.datetime.second = $datetime.second AND \`temporalNode\`.datetime.millisecond = $datetime.millisecond AND \`temporalNode\`.datetime.microsecond = $datetime.microsecond AND \`temporalNode\`.datetime.nanosecond = $datetime.nanosecond AND \`temporalNode\`.datetime.timezone = $datetime.timezone RETURN \`temporalNode\` {_id: ID(\`temporalNode\`),time: { hour: \`temporalNode\`.time.hour , minute: \`temporalNode\`.time.minute , second: \`temporalNode\`.time.second , millisecond: \`temporalNode\`.time.millisecond , microsecond: \`temporalNode\`.time.microsecond , nanosecond: \`temporalNode\`.time.nanosecond , timezone: \`temporalNode\`.time.timezone , formatted: toString(\`temporalNode\`.time) },date: { year: \`temporalNode\`.date.year , month: \`temporalNode\`.date.month , day: \`temporalNode\`.date.day , formatted: toString(\`temporalNode\`.date) },datetime: { year: \`temporalNode\`.datetime.year , month: \`temporalNode\`.datetime.month , day: \`temporalNode\`.datetime.day , hour: \`temporalNode\`.datetime.hour , minute: \`temporalNode\`.datetime.minute , second: \`temporalNode\`.datetime.second , millisecond: \`temporalNode\`.datetime.millisecond , microsecond: \`temporalNode\`.datetime.microsecond , nanosecond: \`temporalNode\`.datetime.nanosecond , timezone: \`temporalNode\`.datetime.timezone , formatted: toString(\`temporalNode\`.datetime) },localtime: { hour: \`temporalNode\`.localtime.hour , minute: \`temporalNode\`.localtime.minute , second: \`temporalNode\`.localtime.second , millisecond: \`temporalNode\`.localtime.millisecond , microsecond: \`temporalNode\`.localtime.microsecond , nanosecond: \`temporalNode\`.localtime.nanosecond , formatted: toString(\`temporalNode\`.localtime) },localdatetime: { year: \`temporalNode\`.localdatetime.year , month: \`temporalNode\`.localdatetime.month , day: \`temporalNode\`.localdatetime.day , hour: \`temporalNode\`.localdatetime.hour , minute: \`temporalNode\`.localdatetime.minute , second: \`temporalNode\`.localdatetime.second , millisecond: \`temporalNode\`.localdatetime.millisecond , microsecond: \`temporalNode\`.localdatetime.microsecond , nanosecond: \`temporalNode\`.localdatetime.nanosecond , formatted: toString(\`temporalNode\`.localdatetime) },temporalNodes: [(\`temporalNode\`)-[:\`TEMPORAL\`]->(\`temporalNode_temporalNodes\`:\`TemporalNode\`) WHERE temporalNode_temporalNodes.datetime.year = $_1_datetime.year AND temporalNode_temporalNodes.datetime.month = $_1_datetime.month AND temporalNode_temporalNodes.datetime.day = $_1_datetime.day AND temporalNode_temporalNodes.datetime.hour = $_1_datetime.hour AND temporalNode_temporalNodes.datetime.minute = $_1_datetime.minute AND temporalNode_temporalNodes.datetime.second = $_1_datetime.second AND temporalNode_temporalNodes.datetime.millisecond = $_1_datetime.millisecond AND temporalNode_temporalNodes.datetime.microsecond = $_1_datetime.microsecond AND temporalNode_temporalNodes.datetime.nanosecond = $_1_datetime.nanosecond AND temporalNode_temporalNodes.datetime.timezone = $_1_datetime.timezone AND temporalNode_temporalNodes.localdatetime = localdatetime($_1_localdatetime.formatted) | \`temporalNode_temporalNodes\` {_id: ID(\`temporalNode_temporalNodes\`),time: { hour: \`temporalNode_temporalNodes\`.time.hour , minute: \`temporalNode_temporalNodes\`.time.minute , second: \`temporalNode_temporalNodes\`.time.second , millisecond: \`temporalNode_temporalNodes\`.time.millisecond , microsecond: \`temporalNode_temporalNodes\`.time.microsecond , nanosecond: \`temporalNode_temporalNodes\`.time.nanosecond , timezone: \`temporalNode_temporalNodes\`.time.timezone , formatted: toString(\`temporalNode_temporalNodes\`.time) },date: { year: \`temporalNode_temporalNodes\`.date.year , month: \`temporalNode_temporalNodes\`.date.month , day: \`temporalNode_temporalNodes\`.date.day , formatted: toString(\`temporalNode_temporalNodes\`.date) },datetime: { year: \`temporalNode_temporalNodes\`.datetime.year , month: \`temporalNode_temporalNodes\`.datetime.month , day: \`temporalNode_temporalNodes\`.datetime.day , hour: \`temporalNode_temporalNodes\`.datetime.hour , minute: \`temporalNode_temporalNodes\`.datetime.minute , second: \`temporalNode_temporalNodes\`.datetime.second , millisecond: \`temporalNode_temporalNodes\`.datetime.millisecond , microsecond: \`temporalNode_temporalNodes\`.datetime.microsecond , nanosecond: \`temporalNode_temporalNodes\`.datetime.nanosecond , timezone: \`temporalNode_temporalNodes\`.datetime.timezone , formatted: toString(\`temporalNode_temporalNodes\`.datetime) },localtime: { hour: \`temporalNode_temporalNodes\`.localtime.hour , minute: \`temporalNode_temporalNodes\`.localtime.minute , second: \`temporalNode_temporalNodes\`.localtime.second , millisecond: \`temporalNode_temporalNodes\`.localtime.millisecond , microsecond: \`temporalNode_temporalNodes\`.localtime.microsecond , nanosecond: \`temporalNode_temporalNodes\`.localtime.nanosecond , formatted: toString(\`temporalNode_temporalNodes\`.localtime) },localdatetime: { year: \`temporalNode_temporalNodes\`.localdatetime.year , month: \`temporalNode_temporalNodes\`.localdatetime.month , day: \`temporalNode_temporalNodes\`.localdatetime.day , hour: \`temporalNode_temporalNodes\`.localdatetime.hour , minute: \`temporalNode_temporalNodes\`.localdatetime.minute , second: \`temporalNode_temporalNodes\`.localdatetime.second , millisecond: \`temporalNode_temporalNodes\`.localdatetime.millisecond , microsecond: \`temporalNode_temporalNodes\`.localdatetime.microsecond , nanosecond: \`temporalNode_temporalNodes\`.localdatetime.nanosecond , formatted: toString(\`temporalNode_temporalNodes\`.localdatetime) }}] } AS \`temporalNode\``,
     expectedParams = {
       offset: 0,
       first: -1,
@@ -4517,7 +4517,7 @@ test('Nested Query with temporal property arguments', t => {
         nanosecond: 2003004,
         timezone: 'America/Los_Angeles'
       },
-      '1_datetime': {
+      _1_datetime: {
         year: 2020,
         month: 11,
         day: 23,
@@ -4529,7 +4529,7 @@ test('Nested Query with temporal property arguments', t => {
         nanosecond: 2003004,
         timezone: 'America/Los_Angeles'
       },
-      '1_localdatetime': {
+      _1_localdatetime: {
         year: 2018,
         month: 11,
         day: 23,
@@ -4570,14 +4570,14 @@ test('Nested Query with spatial property arguments', t => {
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`spatialNode\`:\`SpatialNode\`) WHERE \`spatialNode\`.point.longitude = $point.longitude RETURN \`spatialNode\` {point: { longitude: \`spatialNode\`.point.longitude , latitude: \`spatialNode\`.point.latitude , height: \`spatialNode\`.point.height },spatialNodes: [(\`spatialNode\`)-[:\`SPATIAL\`]->(\`spatialNode_spatialNodes\`:\`SpatialNode\`) WHERE spatialNode_spatialNodes.point.longitude = $1_point.longitude | \`spatialNode_spatialNodes\` {point: { longitude: \`spatialNode_spatialNodes\`.point.longitude , latitude: \`spatialNode_spatialNodes\`.point.latitude , height: \`spatialNode_spatialNodes\`.point.height }}] } AS \`spatialNode\``,
+    expectedCypherQuery = `MATCH (\`spatialNode\`:\`SpatialNode\`) WHERE \`spatialNode\`.point.longitude = $point.longitude RETURN \`spatialNode\` {point: { longitude: \`spatialNode\`.point.longitude , latitude: \`spatialNode\`.point.latitude , height: \`spatialNode\`.point.height },spatialNodes: [(\`spatialNode\`)-[:\`SPATIAL\`]->(\`spatialNode_spatialNodes\`:\`SpatialNode\`) WHERE spatialNode_spatialNodes.point.longitude = $_1_point.longitude | \`spatialNode_spatialNodes\` {point: { longitude: \`spatialNode_spatialNodes\`.point.longitude , latitude: \`spatialNode_spatialNodes\`.point.latitude , height: \`spatialNode_spatialNodes\`.point.height }}] } AS \`spatialNode\``,
     expectedParams = {
       offset: 0,
       first: -1,
       point: {
         longitude: 1.5
       },
-      '1_point': {
+      _1_point: {
         longitude: 40
       },
       cypherParams: CYPHER_PARAMS
@@ -5832,11 +5832,11 @@ test('Query nested temporal properties on reflexive relationship using temporal 
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` { .userId , .name ,friends: {from: [(\`user\`)<-[\`user_from_relation\`:\`FRIEND_OF\`]-(\`user_from\`:\`User\`) WHERE user_from_relation.time = time($1_time.formatted) AND user_from_relation.date.year = $1_date.year AND user_from_relation.date.month = $1_date.month AND user_from_relation.date.day = $1_date.day AND user_from_relation.datetime.year = $1_datetime.year AND user_from_relation.datetime.month = $1_datetime.month AND user_from_relation.datetime.day = $1_datetime.day AND user_from_relation.datetime.hour = $1_datetime.hour AND user_from_relation.datetime.minute = $1_datetime.minute AND user_from_relation.datetime.second = $1_datetime.second AND user_from_relation.datetime.millisecond = $1_datetime.millisecond AND user_from_relation.datetime.microsecond = $1_datetime.microsecond AND user_from_relation.datetime.nanosecond = $1_datetime.nanosecond AND user_from_relation.datetime.timezone = $1_datetime.timezone AND user_from_relation.localtime.hour = $1_localtime.hour AND user_from_relation.localtime.minute = $1_localtime.minute AND user_from_relation.localtime.second = $1_localtime.second AND user_from_relation.localtime.millisecond = $1_localtime.millisecond AND user_from_relation.localtime.microsecond = $1_localtime.microsecond AND user_from_relation.localtime.nanosecond = $1_localtime.nanosecond AND user_from_relation.localdatetime.year = $1_localdatetime.year AND user_from_relation.localdatetime.month = $1_localdatetime.month AND user_from_relation.localdatetime.day = $1_localdatetime.day AND user_from_relation.localdatetime.hour = $1_localdatetime.hour AND user_from_relation.localdatetime.minute = $1_localdatetime.minute AND user_from_relation.localdatetime.second = $1_localdatetime.second AND user_from_relation.localdatetime.millisecond = $1_localdatetime.millisecond AND user_from_relation.localdatetime.microsecond = $1_localdatetime.microsecond AND user_from_relation.localdatetime.nanosecond = $1_localdatetime.nanosecond | user_from_relation { .since ,time: { hour: \`user_from_relation\`.time.hour , minute: \`user_from_relation\`.time.minute , second: \`user_from_relation\`.time.second , millisecond: \`user_from_relation\`.time.millisecond , microsecond: \`user_from_relation\`.time.microsecond , nanosecond: \`user_from_relation\`.time.nanosecond , timezone: \`user_from_relation\`.time.timezone , formatted: toString(\`user_from_relation\`.time) },date: { year: \`user_from_relation\`.date.year , month: \`user_from_relation\`.date.month , day: \`user_from_relation\`.date.day , formatted: toString(\`user_from_relation\`.date) },datetime: { year: \`user_from_relation\`.datetime.year , month: \`user_from_relation\`.datetime.month , day: \`user_from_relation\`.datetime.day , hour: \`user_from_relation\`.datetime.hour , minute: \`user_from_relation\`.datetime.minute , second: \`user_from_relation\`.datetime.second , millisecond: \`user_from_relation\`.datetime.millisecond , microsecond: \`user_from_relation\`.datetime.microsecond , nanosecond: \`user_from_relation\`.datetime.nanosecond , timezone: \`user_from_relation\`.datetime.timezone , formatted: toString(\`user_from_relation\`.datetime) },datetimes: reduce(a = [], INSTANCE IN user_from_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , hour: INSTANCE.hour , minute: INSTANCE.minute , second: INSTANCE.second , millisecond: INSTANCE.millisecond , microsecond: INSTANCE.microsecond , nanosecond: INSTANCE.nanosecond , timezone: INSTANCE.timezone , formatted: toString(INSTANCE) }),localtime: { hour: \`user_from_relation\`.localtime.hour , minute: \`user_from_relation\`.localtime.minute , second: \`user_from_relation\`.localtime.second , millisecond: \`user_from_relation\`.localtime.millisecond , microsecond: \`user_from_relation\`.localtime.microsecond , nanosecond: \`user_from_relation\`.localtime.nanosecond , formatted: toString(\`user_from_relation\`.localtime) },localdatetime: { year: \`user_from_relation\`.localdatetime.year , month: \`user_from_relation\`.localdatetime.month , day: \`user_from_relation\`.localdatetime.day , hour: \`user_from_relation\`.localdatetime.hour , minute: \`user_from_relation\`.localdatetime.minute , second: \`user_from_relation\`.localdatetime.second , millisecond: \`user_from_relation\`.localdatetime.millisecond , microsecond: \`user_from_relation\`.localdatetime.microsecond , nanosecond: \`user_from_relation\`.localdatetime.nanosecond , formatted: toString(\`user_from_relation\`.localdatetime) },User: user_from {_id: ID(\`user_from\`), .userId ,rated: [(\`user_from\`)-[\`user_from_rated_relation\`:\`RATED\`]->(:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | user_from_rated_relation {datetime: { year: \`user_from_rated_relation\`.datetime.year }}] } }] ,to: [(\`user\`)-[\`user_to_relation\`:\`FRIEND_OF\`]->(\`user_to\`:\`User\`) WHERE user_to_relation.time = time($3_time.formatted) AND user_to_relation.date.year = $3_date.year AND user_to_relation.date.month = $3_date.month AND user_to_relation.date.day = $3_date.day AND user_to_relation.datetime.year = $3_datetime.year AND user_to_relation.datetime.month = $3_datetime.month AND user_to_relation.datetime.day = $3_datetime.day AND user_to_relation.datetime.hour = $3_datetime.hour AND user_to_relation.datetime.minute = $3_datetime.minute AND user_to_relation.datetime.second = $3_datetime.second AND user_to_relation.datetime.millisecond = $3_datetime.millisecond AND user_to_relation.datetime.microsecond = $3_datetime.microsecond AND user_to_relation.datetime.nanosecond = $3_datetime.nanosecond AND user_to_relation.datetime.timezone = $3_datetime.timezone AND user_to_relation.localtime.hour = $3_localtime.hour AND user_to_relation.localtime.minute = $3_localtime.minute AND user_to_relation.localtime.second = $3_localtime.second AND user_to_relation.localtime.millisecond = $3_localtime.millisecond AND user_to_relation.localtime.microsecond = $3_localtime.microsecond AND user_to_relation.localtime.nanosecond = $3_localtime.nanosecond AND user_to_relation.localdatetime.year = $3_localdatetime.year AND user_to_relation.localdatetime.month = $3_localdatetime.month AND user_to_relation.localdatetime.day = $3_localdatetime.day AND user_to_relation.localdatetime.hour = $3_localdatetime.hour AND user_to_relation.localdatetime.minute = $3_localdatetime.minute AND user_to_relation.localdatetime.second = $3_localdatetime.second AND user_to_relation.localdatetime.millisecond = $3_localdatetime.millisecond AND user_to_relation.localdatetime.microsecond = $3_localdatetime.microsecond AND user_to_relation.localdatetime.nanosecond = $3_localdatetime.nanosecond | user_to_relation { .since ,time: { hour: \`user_to_relation\`.time.hour , minute: \`user_to_relation\`.time.minute , second: \`user_to_relation\`.time.second , millisecond: \`user_to_relation\`.time.millisecond , microsecond: \`user_to_relation\`.time.microsecond , nanosecond: \`user_to_relation\`.time.nanosecond , timezone: \`user_to_relation\`.time.timezone , formatted: toString(\`user_to_relation\`.time) },date: { year: \`user_to_relation\`.date.year , month: \`user_to_relation\`.date.month , day: \`user_to_relation\`.date.day , formatted: toString(\`user_to_relation\`.date) },datetime: { year: \`user_to_relation\`.datetime.year , month: \`user_to_relation\`.datetime.month , day: \`user_to_relation\`.datetime.day , hour: \`user_to_relation\`.datetime.hour , minute: \`user_to_relation\`.datetime.minute , second: \`user_to_relation\`.datetime.second , millisecond: \`user_to_relation\`.datetime.millisecond , microsecond: \`user_to_relation\`.datetime.microsecond , nanosecond: \`user_to_relation\`.datetime.nanosecond , timezone: \`user_to_relation\`.datetime.timezone , formatted: toString(\`user_to_relation\`.datetime) },localtime: { hour: \`user_to_relation\`.localtime.hour , minute: \`user_to_relation\`.localtime.minute , second: \`user_to_relation\`.localtime.second , millisecond: \`user_to_relation\`.localtime.millisecond , microsecond: \`user_to_relation\`.localtime.microsecond , nanosecond: \`user_to_relation\`.localtime.nanosecond , formatted: toString(\`user_to_relation\`.localtime) },localdatetime: { year: \`user_to_relation\`.localdatetime.year , month: \`user_to_relation\`.localdatetime.month , day: \`user_to_relation\`.localdatetime.day , hour: \`user_to_relation\`.localdatetime.hour , minute: \`user_to_relation\`.localdatetime.minute , second: \`user_to_relation\`.localdatetime.second , millisecond: \`user_to_relation\`.localdatetime.millisecond , microsecond: \`user_to_relation\`.localdatetime.microsecond , nanosecond: \`user_to_relation\`.localdatetime.nanosecond , formatted: toString(\`user_to_relation\`.localdatetime) },User: user_to {_id: ID(\`user_to\`), .userId ,rated: [(\`user_to\`)-[\`user_to_rated_relation\`:\`RATED\`]->(:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | user_to_rated_relation {datetime: { year: \`user_to_rated_relation\`.datetime.year }}] } }] } } AS \`user\``,
+    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` { .userId , .name ,friends: {from: [(\`user\`)<-[\`user_from_relation\`:\`FRIEND_OF\`]-(\`user_from\`:\`User\`) WHERE user_from_relation.time = time($_1_time.formatted) AND user_from_relation.date.year = $_1_date.year AND user_from_relation.date.month = $_1_date.month AND user_from_relation.date.day = $_1_date.day AND user_from_relation.datetime.year = $_1_datetime.year AND user_from_relation.datetime.month = $_1_datetime.month AND user_from_relation.datetime.day = $_1_datetime.day AND user_from_relation.datetime.hour = $_1_datetime.hour AND user_from_relation.datetime.minute = $_1_datetime.minute AND user_from_relation.datetime.second = $_1_datetime.second AND user_from_relation.datetime.millisecond = $_1_datetime.millisecond AND user_from_relation.datetime.microsecond = $_1_datetime.microsecond AND user_from_relation.datetime.nanosecond = $_1_datetime.nanosecond AND user_from_relation.datetime.timezone = $_1_datetime.timezone AND user_from_relation.localtime.hour = $_1_localtime.hour AND user_from_relation.localtime.minute = $_1_localtime.minute AND user_from_relation.localtime.second = $_1_localtime.second AND user_from_relation.localtime.millisecond = $_1_localtime.millisecond AND user_from_relation.localtime.microsecond = $_1_localtime.microsecond AND user_from_relation.localtime.nanosecond = $_1_localtime.nanosecond AND user_from_relation.localdatetime.year = $_1_localdatetime.year AND user_from_relation.localdatetime.month = $_1_localdatetime.month AND user_from_relation.localdatetime.day = $_1_localdatetime.day AND user_from_relation.localdatetime.hour = $_1_localdatetime.hour AND user_from_relation.localdatetime.minute = $_1_localdatetime.minute AND user_from_relation.localdatetime.second = $_1_localdatetime.second AND user_from_relation.localdatetime.millisecond = $_1_localdatetime.millisecond AND user_from_relation.localdatetime.microsecond = $_1_localdatetime.microsecond AND user_from_relation.localdatetime.nanosecond = $_1_localdatetime.nanosecond | user_from_relation { .since ,time: { hour: \`user_from_relation\`.time.hour , minute: \`user_from_relation\`.time.minute , second: \`user_from_relation\`.time.second , millisecond: \`user_from_relation\`.time.millisecond , microsecond: \`user_from_relation\`.time.microsecond , nanosecond: \`user_from_relation\`.time.nanosecond , timezone: \`user_from_relation\`.time.timezone , formatted: toString(\`user_from_relation\`.time) },date: { year: \`user_from_relation\`.date.year , month: \`user_from_relation\`.date.month , day: \`user_from_relation\`.date.day , formatted: toString(\`user_from_relation\`.date) },datetime: { year: \`user_from_relation\`.datetime.year , month: \`user_from_relation\`.datetime.month , day: \`user_from_relation\`.datetime.day , hour: \`user_from_relation\`.datetime.hour , minute: \`user_from_relation\`.datetime.minute , second: \`user_from_relation\`.datetime.second , millisecond: \`user_from_relation\`.datetime.millisecond , microsecond: \`user_from_relation\`.datetime.microsecond , nanosecond: \`user_from_relation\`.datetime.nanosecond , timezone: \`user_from_relation\`.datetime.timezone , formatted: toString(\`user_from_relation\`.datetime) },datetimes: reduce(a = [], INSTANCE IN user_from_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , hour: INSTANCE.hour , minute: INSTANCE.minute , second: INSTANCE.second , millisecond: INSTANCE.millisecond , microsecond: INSTANCE.microsecond , nanosecond: INSTANCE.nanosecond , timezone: INSTANCE.timezone , formatted: toString(INSTANCE) }),localtime: { hour: \`user_from_relation\`.localtime.hour , minute: \`user_from_relation\`.localtime.minute , second: \`user_from_relation\`.localtime.second , millisecond: \`user_from_relation\`.localtime.millisecond , microsecond: \`user_from_relation\`.localtime.microsecond , nanosecond: \`user_from_relation\`.localtime.nanosecond , formatted: toString(\`user_from_relation\`.localtime) },localdatetime: { year: \`user_from_relation\`.localdatetime.year , month: \`user_from_relation\`.localdatetime.month , day: \`user_from_relation\`.localdatetime.day , hour: \`user_from_relation\`.localdatetime.hour , minute: \`user_from_relation\`.localdatetime.minute , second: \`user_from_relation\`.localdatetime.second , millisecond: \`user_from_relation\`.localdatetime.millisecond , microsecond: \`user_from_relation\`.localdatetime.microsecond , nanosecond: \`user_from_relation\`.localdatetime.nanosecond , formatted: toString(\`user_from_relation\`.localdatetime) },User: user_from {_id: ID(\`user_from\`), .userId ,rated: [(\`user_from\`)-[\`user_from_rated_relation\`:\`RATED\`]->(:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | user_from_rated_relation {datetime: { year: \`user_from_rated_relation\`.datetime.year }}] } }] ,to: [(\`user\`)-[\`user_to_relation\`:\`FRIEND_OF\`]->(\`user_to\`:\`User\`) WHERE user_to_relation.time = time($_3_time.formatted) AND user_to_relation.date.year = $_3_date.year AND user_to_relation.date.month = $_3_date.month AND user_to_relation.date.day = $_3_date.day AND user_to_relation.datetime.year = $_3_datetime.year AND user_to_relation.datetime.month = $_3_datetime.month AND user_to_relation.datetime.day = $_3_datetime.day AND user_to_relation.datetime.hour = $_3_datetime.hour AND user_to_relation.datetime.minute = $_3_datetime.minute AND user_to_relation.datetime.second = $_3_datetime.second AND user_to_relation.datetime.millisecond = $_3_datetime.millisecond AND user_to_relation.datetime.microsecond = $_3_datetime.microsecond AND user_to_relation.datetime.nanosecond = $_3_datetime.nanosecond AND user_to_relation.datetime.timezone = $_3_datetime.timezone AND user_to_relation.localtime.hour = $_3_localtime.hour AND user_to_relation.localtime.minute = $_3_localtime.minute AND user_to_relation.localtime.second = $_3_localtime.second AND user_to_relation.localtime.millisecond = $_3_localtime.millisecond AND user_to_relation.localtime.microsecond = $_3_localtime.microsecond AND user_to_relation.localtime.nanosecond = $_3_localtime.nanosecond AND user_to_relation.localdatetime.year = $_3_localdatetime.year AND user_to_relation.localdatetime.month = $_3_localdatetime.month AND user_to_relation.localdatetime.day = $_3_localdatetime.day AND user_to_relation.localdatetime.hour = $_3_localdatetime.hour AND user_to_relation.localdatetime.minute = $_3_localdatetime.minute AND user_to_relation.localdatetime.second = $_3_localdatetime.second AND user_to_relation.localdatetime.millisecond = $_3_localdatetime.millisecond AND user_to_relation.localdatetime.microsecond = $_3_localdatetime.microsecond AND user_to_relation.localdatetime.nanosecond = $_3_localdatetime.nanosecond | user_to_relation { .since ,time: { hour: \`user_to_relation\`.time.hour , minute: \`user_to_relation\`.time.minute , second: \`user_to_relation\`.time.second , millisecond: \`user_to_relation\`.time.millisecond , microsecond: \`user_to_relation\`.time.microsecond , nanosecond: \`user_to_relation\`.time.nanosecond , timezone: \`user_to_relation\`.time.timezone , formatted: toString(\`user_to_relation\`.time) },date: { year: \`user_to_relation\`.date.year , month: \`user_to_relation\`.date.month , day: \`user_to_relation\`.date.day , formatted: toString(\`user_to_relation\`.date) },datetime: { year: \`user_to_relation\`.datetime.year , month: \`user_to_relation\`.datetime.month , day: \`user_to_relation\`.datetime.day , hour: \`user_to_relation\`.datetime.hour , minute: \`user_to_relation\`.datetime.minute , second: \`user_to_relation\`.datetime.second , millisecond: \`user_to_relation\`.datetime.millisecond , microsecond: \`user_to_relation\`.datetime.microsecond , nanosecond: \`user_to_relation\`.datetime.nanosecond , timezone: \`user_to_relation\`.datetime.timezone , formatted: toString(\`user_to_relation\`.datetime) },localtime: { hour: \`user_to_relation\`.localtime.hour , minute: \`user_to_relation\`.localtime.minute , second: \`user_to_relation\`.localtime.second , millisecond: \`user_to_relation\`.localtime.millisecond , microsecond: \`user_to_relation\`.localtime.microsecond , nanosecond: \`user_to_relation\`.localtime.nanosecond , formatted: toString(\`user_to_relation\`.localtime) },localdatetime: { year: \`user_to_relation\`.localdatetime.year , month: \`user_to_relation\`.localdatetime.month , day: \`user_to_relation\`.localdatetime.day , hour: \`user_to_relation\`.localdatetime.hour , minute: \`user_to_relation\`.localdatetime.minute , second: \`user_to_relation\`.localdatetime.second , millisecond: \`user_to_relation\`.localdatetime.millisecond , microsecond: \`user_to_relation\`.localdatetime.microsecond , nanosecond: \`user_to_relation\`.localdatetime.nanosecond , formatted: toString(\`user_to_relation\`.localdatetime) },User: user_to {_id: ID(\`user_to\`), .userId ,rated: [(\`user_to\`)-[\`user_to_rated_relation\`:\`RATED\`]->(:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) | user_to_rated_relation {datetime: { year: \`user_to_rated_relation\`.datetime.year }}] } }] } } AS \`user\``,
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_time': {
+      _1_time: {
         hour: 10,
         minute: 30,
         second: 1,
@@ -5846,12 +5846,12 @@ test('Query nested temporal properties on reflexive relationship using temporal 
         timezone: '-08:00',
         formatted: '10:30:01.002003004-08:00'
       },
-      '1_date': {
+      _1_date: {
         year: 2018,
         month: 11,
         day: 23
       },
-      '1_datetime': {
+      _1_datetime: {
         year: 2018,
         month: 11,
         day: 23,
@@ -5863,7 +5863,7 @@ test('Query nested temporal properties on reflexive relationship using temporal 
         nanosecond: 2003004,
         timezone: 'America/Los_Angeles'
       },
-      '1_localtime': {
+      _1_localtime: {
         hour: 10,
         minute: 30,
         second: 1,
@@ -5871,7 +5871,7 @@ test('Query nested temporal properties on reflexive relationship using temporal 
         microsecond: 2003,
         nanosecond: 2003004
       },
-      '1_localdatetime': {
+      _1_localdatetime: {
         year: 2018,
         month: 11,
         day: 23,
@@ -5882,7 +5882,7 @@ test('Query nested temporal properties on reflexive relationship using temporal 
         microsecond: 2003,
         nanosecond: 2003004
       },
-      '3_time': {
+      _3_time: {
         hour: 10,
         minute: 30,
         second: 1,
@@ -5892,12 +5892,12 @@ test('Query nested temporal properties on reflexive relationship using temporal 
         timezone: '-08:00',
         formatted: '10:30:01.002003004-08:00'
       },
-      '3_date': {
+      _3_date: {
         year: 2018,
         month: 11,
         day: 23
       },
-      '3_datetime': {
+      _3_datetime: {
         year: 2018,
         month: 11,
         day: 23,
@@ -5909,7 +5909,7 @@ test('Query nested temporal properties on reflexive relationship using temporal 
         nanosecond: 2003004,
         timezone: 'America/Los_Angeles'
       },
-      '3_localtime': {
+      _3_localtime: {
         hour: 10,
         minute: 30,
         second: 1,
@@ -5917,7 +5917,7 @@ test('Query nested temporal properties on reflexive relationship using temporal 
         microsecond: 2003,
         nanosecond: 2003004
       },
-      '3_localdatetime': {
+      _3_localdatetime: {
         year: 2018,
         month: 11,
         day: 23,
@@ -6110,12 +6110,12 @@ test('Query nested temporal properties on relationships using temporal arguments
       }
     }
   }`,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) RETURN \`movie\` {_id: ID(\`movie\`), .title ,ratings: [(\`movie\`)<-[\`movie_ratings_relation\`:\`RATED\`{rating:$1_rating}]-(:\`User\`) WHERE movie_ratings_relation.time = time($1_time.formatted) AND movie_ratings_relation.date.year = $1_date.year AND movie_ratings_relation.date.month = $1_date.month AND movie_ratings_relation.date.day = $1_date.day AND movie_ratings_relation.datetime.year = $1_datetime.year AND movie_ratings_relation.datetime.month = $1_datetime.month AND movie_ratings_relation.datetime.day = $1_datetime.day AND movie_ratings_relation.datetime.hour = $1_datetime.hour AND movie_ratings_relation.datetime.minute = $1_datetime.minute AND movie_ratings_relation.datetime.second = $1_datetime.second AND movie_ratings_relation.datetime.millisecond = $1_datetime.millisecond AND movie_ratings_relation.datetime.microsecond = $1_datetime.microsecond AND movie_ratings_relation.datetime.nanosecond = $1_datetime.nanosecond AND movie_ratings_relation.datetime.timezone = $1_datetime.timezone AND movie_ratings_relation.localtime.hour = $1_localtime.hour AND movie_ratings_relation.localtime.minute = $1_localtime.minute AND movie_ratings_relation.localtime.second = $1_localtime.second AND movie_ratings_relation.localtime.millisecond = $1_localtime.millisecond AND movie_ratings_relation.localtime.microsecond = $1_localtime.microsecond AND movie_ratings_relation.localtime.nanosecond = $1_localtime.nanosecond AND movie_ratings_relation.localdatetime.year = $1_localdatetime.year AND movie_ratings_relation.localdatetime.month = $1_localdatetime.month AND movie_ratings_relation.localdatetime.day = $1_localdatetime.day AND movie_ratings_relation.localdatetime.hour = $1_localdatetime.hour AND movie_ratings_relation.localdatetime.minute = $1_localdatetime.minute AND movie_ratings_relation.localdatetime.second = $1_localdatetime.second AND movie_ratings_relation.localdatetime.millisecond = $1_localdatetime.millisecond AND movie_ratings_relation.localdatetime.microsecond = $1_localdatetime.microsecond AND movie_ratings_relation.localdatetime.nanosecond = $1_localdatetime.nanosecond | movie_ratings_relation { .rating ,time: { hour: \`movie_ratings_relation\`.time.hour , minute: \`movie_ratings_relation\`.time.minute , second: \`movie_ratings_relation\`.time.second , millisecond: \`movie_ratings_relation\`.time.millisecond , microsecond: \`movie_ratings_relation\`.time.microsecond , nanosecond: \`movie_ratings_relation\`.time.nanosecond , timezone: \`movie_ratings_relation\`.time.timezone , formatted: toString(\`movie_ratings_relation\`.time) },date: { year: \`movie_ratings_relation\`.date.year , month: \`movie_ratings_relation\`.date.month , day: \`movie_ratings_relation\`.date.day , formatted: toString(\`movie_ratings_relation\`.date) },datetime: { year: \`movie_ratings_relation\`.datetime.year , month: \`movie_ratings_relation\`.datetime.month , day: \`movie_ratings_relation\`.datetime.day , hour: \`movie_ratings_relation\`.datetime.hour , minute: \`movie_ratings_relation\`.datetime.minute , second: \`movie_ratings_relation\`.datetime.second , millisecond: \`movie_ratings_relation\`.datetime.millisecond , microsecond: \`movie_ratings_relation\`.datetime.microsecond , nanosecond: \`movie_ratings_relation\`.datetime.nanosecond , timezone: \`movie_ratings_relation\`.datetime.timezone , formatted: toString(\`movie_ratings_relation\`.datetime) },localtime: { hour: \`movie_ratings_relation\`.localtime.hour , minute: \`movie_ratings_relation\`.localtime.minute , second: \`movie_ratings_relation\`.localtime.second , millisecond: \`movie_ratings_relation\`.localtime.millisecond , microsecond: \`movie_ratings_relation\`.localtime.microsecond , nanosecond: \`movie_ratings_relation\`.localtime.nanosecond , formatted: toString(\`movie_ratings_relation\`.localtime) },localdatetime: { year: \`movie_ratings_relation\`.localdatetime.year , month: \`movie_ratings_relation\`.localdatetime.month , day: \`movie_ratings_relation\`.localdatetime.day , hour: \`movie_ratings_relation\`.localdatetime.hour , minute: \`movie_ratings_relation\`.localdatetime.minute , second: \`movie_ratings_relation\`.localdatetime.second , millisecond: \`movie_ratings_relation\`.localdatetime.millisecond , microsecond: \`movie_ratings_relation\`.localdatetime.microsecond , nanosecond: \`movie_ratings_relation\`.localdatetime.nanosecond , formatted: toString(\`movie_ratings_relation\`.localdatetime) },User: head([(:\`Movie\`${ADDITIONAL_MOVIE_LABELS})<-[\`movie_ratings_relation\`]-(\`movie_ratings_User\`:\`User\`) | movie_ratings_User {_id: ID(\`movie_ratings_User\`), .name ,rated: [(\`movie_ratings_User\`)-[\`movie_ratings_User_rated_relation\`:\`RATED\`{rating:$2_rating}]->(:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) WHERE movie_ratings_User_rated_relation.time = time($2_time.formatted) AND movie_ratings_User_rated_relation.datetime.year = $2_datetime.year | movie_ratings_User_rated_relation { .rating ,time: { hour: \`movie_ratings_User_rated_relation\`.time.hour , minute: \`movie_ratings_User_rated_relation\`.time.minute , second: \`movie_ratings_User_rated_relation\`.time.second , millisecond: \`movie_ratings_User_rated_relation\`.time.millisecond , microsecond: \`movie_ratings_User_rated_relation\`.time.microsecond , nanosecond: \`movie_ratings_User_rated_relation\`.time.nanosecond , timezone: \`movie_ratings_User_rated_relation\`.time.timezone , formatted: toString(\`movie_ratings_User_rated_relation\`.time) },date: { year: \`movie_ratings_User_rated_relation\`.date.year , month: \`movie_ratings_User_rated_relation\`.date.month , day: \`movie_ratings_User_rated_relation\`.date.day , formatted: toString(\`movie_ratings_User_rated_relation\`.date) },datetime: { year: \`movie_ratings_User_rated_relation\`.datetime.year , month: \`movie_ratings_User_rated_relation\`.datetime.month , day: \`movie_ratings_User_rated_relation\`.datetime.day , hour: \`movie_ratings_User_rated_relation\`.datetime.hour , minute: \`movie_ratings_User_rated_relation\`.datetime.minute , second: \`movie_ratings_User_rated_relation\`.datetime.second , millisecond: \`movie_ratings_User_rated_relation\`.datetime.millisecond , microsecond: \`movie_ratings_User_rated_relation\`.datetime.microsecond , nanosecond: \`movie_ratings_User_rated_relation\`.datetime.nanosecond , timezone: \`movie_ratings_User_rated_relation\`.datetime.timezone , formatted: toString(\`movie_ratings_User_rated_relation\`.datetime) },localtime: { hour: \`movie_ratings_User_rated_relation\`.localtime.hour , minute: \`movie_ratings_User_rated_relation\`.localtime.minute , second: \`movie_ratings_User_rated_relation\`.localtime.second , millisecond: \`movie_ratings_User_rated_relation\`.localtime.millisecond , microsecond: \`movie_ratings_User_rated_relation\`.localtime.microsecond , nanosecond: \`movie_ratings_User_rated_relation\`.localtime.nanosecond , formatted: toString(\`movie_ratings_User_rated_relation\`.localtime) },localdatetime: { year: \`movie_ratings_User_rated_relation\`.localdatetime.year , month: \`movie_ratings_User_rated_relation\`.localdatetime.month , day: \`movie_ratings_User_rated_relation\`.localdatetime.day , hour: \`movie_ratings_User_rated_relation\`.localdatetime.hour , minute: \`movie_ratings_User_rated_relation\`.localdatetime.minute , second: \`movie_ratings_User_rated_relation\`.localdatetime.second , millisecond: \`movie_ratings_User_rated_relation\`.localdatetime.millisecond , microsecond: \`movie_ratings_User_rated_relation\`.localdatetime.microsecond , nanosecond: \`movie_ratings_User_rated_relation\`.localdatetime.nanosecond , formatted: toString(\`movie_ratings_User_rated_relation\`.localdatetime) }}] }]) }] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) RETURN \`movie\` {_id: ID(\`movie\`), .title ,ratings: [(\`movie\`)<-[\`movie_ratings_relation\`:\`RATED\`{rating:$_1_rating}]-(:\`User\`) WHERE movie_ratings_relation.time = time($_1_time.formatted) AND movie_ratings_relation.date.year = $_1_date.year AND movie_ratings_relation.date.month = $_1_date.month AND movie_ratings_relation.date.day = $_1_date.day AND movie_ratings_relation.datetime.year = $_1_datetime.year AND movie_ratings_relation.datetime.month = $_1_datetime.month AND movie_ratings_relation.datetime.day = $_1_datetime.day AND movie_ratings_relation.datetime.hour = $_1_datetime.hour AND movie_ratings_relation.datetime.minute = $_1_datetime.minute AND movie_ratings_relation.datetime.second = $_1_datetime.second AND movie_ratings_relation.datetime.millisecond = $_1_datetime.millisecond AND movie_ratings_relation.datetime.microsecond = $_1_datetime.microsecond AND movie_ratings_relation.datetime.nanosecond = $_1_datetime.nanosecond AND movie_ratings_relation.datetime.timezone = $_1_datetime.timezone AND movie_ratings_relation.localtime.hour = $_1_localtime.hour AND movie_ratings_relation.localtime.minute = $_1_localtime.minute AND movie_ratings_relation.localtime.second = $_1_localtime.second AND movie_ratings_relation.localtime.millisecond = $_1_localtime.millisecond AND movie_ratings_relation.localtime.microsecond = $_1_localtime.microsecond AND movie_ratings_relation.localtime.nanosecond = $_1_localtime.nanosecond AND movie_ratings_relation.localdatetime.year = $_1_localdatetime.year AND movie_ratings_relation.localdatetime.month = $_1_localdatetime.month AND movie_ratings_relation.localdatetime.day = $_1_localdatetime.day AND movie_ratings_relation.localdatetime.hour = $_1_localdatetime.hour AND movie_ratings_relation.localdatetime.minute = $_1_localdatetime.minute AND movie_ratings_relation.localdatetime.second = $_1_localdatetime.second AND movie_ratings_relation.localdatetime.millisecond = $_1_localdatetime.millisecond AND movie_ratings_relation.localdatetime.microsecond = $_1_localdatetime.microsecond AND movie_ratings_relation.localdatetime.nanosecond = $_1_localdatetime.nanosecond | movie_ratings_relation { .rating ,time: { hour: \`movie_ratings_relation\`.time.hour , minute: \`movie_ratings_relation\`.time.minute , second: \`movie_ratings_relation\`.time.second , millisecond: \`movie_ratings_relation\`.time.millisecond , microsecond: \`movie_ratings_relation\`.time.microsecond , nanosecond: \`movie_ratings_relation\`.time.nanosecond , timezone: \`movie_ratings_relation\`.time.timezone , formatted: toString(\`movie_ratings_relation\`.time) },date: { year: \`movie_ratings_relation\`.date.year , month: \`movie_ratings_relation\`.date.month , day: \`movie_ratings_relation\`.date.day , formatted: toString(\`movie_ratings_relation\`.date) },datetime: { year: \`movie_ratings_relation\`.datetime.year , month: \`movie_ratings_relation\`.datetime.month , day: \`movie_ratings_relation\`.datetime.day , hour: \`movie_ratings_relation\`.datetime.hour , minute: \`movie_ratings_relation\`.datetime.minute , second: \`movie_ratings_relation\`.datetime.second , millisecond: \`movie_ratings_relation\`.datetime.millisecond , microsecond: \`movie_ratings_relation\`.datetime.microsecond , nanosecond: \`movie_ratings_relation\`.datetime.nanosecond , timezone: \`movie_ratings_relation\`.datetime.timezone , formatted: toString(\`movie_ratings_relation\`.datetime) },localtime: { hour: \`movie_ratings_relation\`.localtime.hour , minute: \`movie_ratings_relation\`.localtime.minute , second: \`movie_ratings_relation\`.localtime.second , millisecond: \`movie_ratings_relation\`.localtime.millisecond , microsecond: \`movie_ratings_relation\`.localtime.microsecond , nanosecond: \`movie_ratings_relation\`.localtime.nanosecond , formatted: toString(\`movie_ratings_relation\`.localtime) },localdatetime: { year: \`movie_ratings_relation\`.localdatetime.year , month: \`movie_ratings_relation\`.localdatetime.month , day: \`movie_ratings_relation\`.localdatetime.day , hour: \`movie_ratings_relation\`.localdatetime.hour , minute: \`movie_ratings_relation\`.localdatetime.minute , second: \`movie_ratings_relation\`.localdatetime.second , millisecond: \`movie_ratings_relation\`.localdatetime.millisecond , microsecond: \`movie_ratings_relation\`.localdatetime.microsecond , nanosecond: \`movie_ratings_relation\`.localdatetime.nanosecond , formatted: toString(\`movie_ratings_relation\`.localdatetime) },User: head([(:\`Movie\`${ADDITIONAL_MOVIE_LABELS})<-[\`movie_ratings_relation\`]-(\`movie_ratings_User\`:\`User\`) | movie_ratings_User {_id: ID(\`movie_ratings_User\`), .name ,rated: [(\`movie_ratings_User\`)-[\`movie_ratings_User_rated_relation\`:\`RATED\`{rating:$_2_rating}]->(:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) WHERE movie_ratings_User_rated_relation.time = time($_2_time.formatted) AND movie_ratings_User_rated_relation.datetime.year = $_2_datetime.year | movie_ratings_User_rated_relation { .rating ,time: { hour: \`movie_ratings_User_rated_relation\`.time.hour , minute: \`movie_ratings_User_rated_relation\`.time.minute , second: \`movie_ratings_User_rated_relation\`.time.second , millisecond: \`movie_ratings_User_rated_relation\`.time.millisecond , microsecond: \`movie_ratings_User_rated_relation\`.time.microsecond , nanosecond: \`movie_ratings_User_rated_relation\`.time.nanosecond , timezone: \`movie_ratings_User_rated_relation\`.time.timezone , formatted: toString(\`movie_ratings_User_rated_relation\`.time) },date: { year: \`movie_ratings_User_rated_relation\`.date.year , month: \`movie_ratings_User_rated_relation\`.date.month , day: \`movie_ratings_User_rated_relation\`.date.day , formatted: toString(\`movie_ratings_User_rated_relation\`.date) },datetime: { year: \`movie_ratings_User_rated_relation\`.datetime.year , month: \`movie_ratings_User_rated_relation\`.datetime.month , day: \`movie_ratings_User_rated_relation\`.datetime.day , hour: \`movie_ratings_User_rated_relation\`.datetime.hour , minute: \`movie_ratings_User_rated_relation\`.datetime.minute , second: \`movie_ratings_User_rated_relation\`.datetime.second , millisecond: \`movie_ratings_User_rated_relation\`.datetime.millisecond , microsecond: \`movie_ratings_User_rated_relation\`.datetime.microsecond , nanosecond: \`movie_ratings_User_rated_relation\`.datetime.nanosecond , timezone: \`movie_ratings_User_rated_relation\`.datetime.timezone , formatted: toString(\`movie_ratings_User_rated_relation\`.datetime) },localtime: { hour: \`movie_ratings_User_rated_relation\`.localtime.hour , minute: \`movie_ratings_User_rated_relation\`.localtime.minute , second: \`movie_ratings_User_rated_relation\`.localtime.second , millisecond: \`movie_ratings_User_rated_relation\`.localtime.millisecond , microsecond: \`movie_ratings_User_rated_relation\`.localtime.microsecond , nanosecond: \`movie_ratings_User_rated_relation\`.localtime.nanosecond , formatted: toString(\`movie_ratings_User_rated_relation\`.localtime) },localdatetime: { year: \`movie_ratings_User_rated_relation\`.localdatetime.year , month: \`movie_ratings_User_rated_relation\`.localdatetime.month , day: \`movie_ratings_User_rated_relation\`.localdatetime.day , hour: \`movie_ratings_User_rated_relation\`.localdatetime.hour , minute: \`movie_ratings_User_rated_relation\`.localdatetime.minute , second: \`movie_ratings_User_rated_relation\`.localdatetime.second , millisecond: \`movie_ratings_User_rated_relation\`.localdatetime.millisecond , microsecond: \`movie_ratings_User_rated_relation\`.localdatetime.microsecond , nanosecond: \`movie_ratings_User_rated_relation\`.localdatetime.nanosecond , formatted: toString(\`movie_ratings_User_rated_relation\`.localdatetime) }}] }]) }] } AS \`movie\``,
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_rating': 5,
-      '1_time': {
+      _1_rating: 5,
+      _1_time: {
         hour: 10,
         minute: 30,
         second: 1,
@@ -6125,12 +6125,12 @@ test('Query nested temporal properties on relationships using temporal arguments
         timezone: '-08:00',
         formatted: '10:30:01.002003004-08:00'
       },
-      '1_date': {
+      _1_date: {
         year: 2017,
         month: 11,
         day: 23
       },
-      '1_datetime': {
+      _1_datetime: {
         year: 2020,
         month: 11,
         day: 23,
@@ -6142,7 +6142,7 @@ test('Query nested temporal properties on relationships using temporal arguments
         nanosecond: 2003004,
         timezone: 'America/Los_Angeles'
       },
-      '1_localtime': {
+      _1_localtime: {
         hour: 10,
         minute: 30,
         second: 1,
@@ -6150,7 +6150,7 @@ test('Query nested temporal properties on relationships using temporal arguments
         microsecond: 2003,
         nanosecond: 2003004
       },
-      '1_localdatetime': {
+      _1_localdatetime: {
         year: 2018,
         month: 11,
         day: 23,
@@ -6161,11 +6161,11 @@ test('Query nested temporal properties on relationships using temporal arguments
         microsecond: 2003,
         nanosecond: 2003004
       },
-      '2_rating': 5,
-      '2_time': {
+      _2_rating: 5,
+      _2_time: {
         formatted: '10:30:01.002003004-08:00'
       },
-      '2_datetime': {
+      _2_datetime: {
         year: 2020
       },
       cypherParams: CYPHER_PARAMS
@@ -6665,12 +6665,12 @@ test('Query list properties on nested node type using list arguments', t => {
     }
   }
   `,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) RETURN \`movie\` {_id: ID(\`movie\`), .year ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) WHERE [value IN $1_strings WHERE value IN \`movie_actors\`.\`strings\`] AND [value IN $1_datetimes WHERE [prop IN \`movie_actors\`.\`datetimes\` WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.month IS NULL OR prop.month = value.month) AND (value.day IS NULL OR prop.day = value.day) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]] | \`movie_actors\` { .name }] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) RETURN \`movie\` {_id: ID(\`movie\`), .year ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) WHERE [value IN $_1_strings WHERE value IN \`movie_actors\`.\`strings\`] AND [value IN $_1_datetimes WHERE [prop IN \`movie_actors\`.\`datetimes\` WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.month IS NULL OR prop.month = value.month) AND (value.day IS NULL OR prop.day = value.day) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]] | \`movie_actors\` { .name }] } AS \`movie\``,
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_strings': ['B'],
-      '1_datetimes': [
+      _1_strings: ['B'],
+      _1_datetimes: [
         {
           year: 2020,
           month: 11,
@@ -6725,12 +6725,12 @@ test('Query list properties on relationship type field using list arguments', t 
     }
   }
   `,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) RETURN \`movie\` {_id: ID(\`movie\`), .year ,ratings: [(\`movie\`)<-[\`movie_ratings_relation\`:\`RATED\`]-(:\`User\`) WHERE [value IN $1_ratings WHERE value IN \`movie_ratings_relation\`.\`ratings\`] AND [value IN $1_datetimes WHERE [prop IN \`movie_ratings_relation\`.\`datetimes\` WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.month IS NULL OR prop.month = value.month) AND (value.day IS NULL OR prop.day = value.day) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]] | movie_ratings_relation { .ratings ,datetimes: reduce(a = [], INSTANCE IN movie_ratings_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , formatted: toString(INSTANCE) })}] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) RETURN \`movie\` {_id: ID(\`movie\`), .year ,ratings: [(\`movie\`)<-[\`movie_ratings_relation\`:\`RATED\`]-(:\`User\`) WHERE [value IN $_1_ratings WHERE value IN \`movie_ratings_relation\`.\`ratings\`] AND [value IN $_1_datetimes WHERE [prop IN \`movie_ratings_relation\`.\`datetimes\` WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.month IS NULL OR prop.month = value.month) AND (value.day IS NULL OR prop.day = value.day) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]] | movie_ratings_relation { .ratings ,datetimes: reduce(a = [], INSTANCE IN movie_ratings_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , formatted: toString(INSTANCE) })}] } AS \`movie\``,
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_ratings': [12, 20],
-      '1_datetimes': [
+      _1_ratings: [12, 20],
+      _1_datetimes: [
         {
           year: 2019,
           month: 12,
@@ -6805,12 +6805,12 @@ test('Query list properties on reflexive relationship type field using list argu
     }
   }
   `,
-    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` {friends: {to: [(\`user\`)-[\`user_to_relation\`:\`FRIEND_OF\`]->(\`user_to\`:\`User\`) WHERE [value IN $1_ratings WHERE value IN \`user_to_relation\`.\`ratings\`] AND [value IN $1_datetimes WHERE [prop IN \`user_to_relation\`.\`datetimes\` WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.month IS NULL OR prop.month = value.month) AND (value.day IS NULL OR prop.day = value.day) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]] | user_to_relation {_id: ID(\`user_to_relation\`), .ratings ,datetimes: reduce(a = [], INSTANCE IN user_to_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , formatted: toString(INSTANCE) })}] ,from: [(\`user\`)<-[\`user_from_relation\`:\`FRIEND_OF\`]-(\`user_from\`:\`User\`) WHERE [value IN $3_ratings WHERE value IN \`user_from_relation\`.\`ratings\`] AND [value IN $3_datetimes WHERE [prop IN \`user_from_relation\`.\`datetimes\` WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.month IS NULL OR prop.month = value.month) AND (value.day IS NULL OR prop.day = value.day) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]] | user_from_relation {_id: ID(\`user_from_relation\`), .ratings ,datetimes: reduce(a = [], INSTANCE IN user_from_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , formatted: toString(INSTANCE) })}] } } AS \`user\``,
+    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` {friends: {to: [(\`user\`)-[\`user_to_relation\`:\`FRIEND_OF\`]->(\`user_to\`:\`User\`) WHERE [value IN $_1_ratings WHERE value IN \`user_to_relation\`.\`ratings\`] AND [value IN $_1_datetimes WHERE [prop IN \`user_to_relation\`.\`datetimes\` WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.month IS NULL OR prop.month = value.month) AND (value.day IS NULL OR prop.day = value.day) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]] | user_to_relation {_id: ID(\`user_to_relation\`), .ratings ,datetimes: reduce(a = [], INSTANCE IN user_to_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , formatted: toString(INSTANCE) })}] ,from: [(\`user\`)<-[\`user_from_relation\`:\`FRIEND_OF\`]-(\`user_from\`:\`User\`) WHERE [value IN $_3_ratings WHERE value IN \`user_from_relation\`.\`ratings\`] AND [value IN $_3_datetimes WHERE [prop IN \`user_from_relation\`.\`datetimes\` WHERE ((value.year IS NULL OR prop.year = value.year) AND (value.month IS NULL OR prop.month = value.month) AND (value.day IS NULL OR prop.day = value.day) AND (value.formatted IS NULL OR prop = datetime(value.formatted)))]] | user_from_relation {_id: ID(\`user_from_relation\`), .ratings ,datetimes: reduce(a = [], INSTANCE IN user_from_relation.datetimes | a + { year: INSTANCE.year , month: INSTANCE.month , day: INSTANCE.day , formatted: toString(INSTANCE) })}] } } AS \`user\``,
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_ratings': ['B'],
-      '1_datetimes': [
+      _1_ratings: ['B'],
+      _1_datetimes: [
         {
           year: 2018,
           month: 10,
@@ -6820,8 +6820,8 @@ test('Query list properties on reflexive relationship type field using list argu
           formatted: '2020-11-23T00:00:00Z'
         }
       ],
-      '3_ratings': ['A'],
-      '3_datetimes': [
+      _3_ratings: ['A'],
+      _3_datetimes: [
         {
           year: 2018,
           month: 10,
@@ -6908,10 +6908,10 @@ test('Custom query for nested non-list property on node type using list argument
         }
       }
     }`,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) WHERE \`movie\`.\`year\` IN $year RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) WHERE \`movie_actors\`.\`names\` IN $1_names | \`movie_actors\` { .name }] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) WHERE \`movie\`.\`year\` IN $year RETURN \`movie\` { .title ,actors: [(\`movie\`)<-[:\`ACTED_IN\`]-(\`movie_actors\`:\`Actor\`) WHERE \`movie_actors\`.\`names\` IN $_1_names | \`movie_actors\` { .name }] } AS \`movie\``,
     expectedParams = {
       year: [1998],
-      '1_names': ['Jeff Bridges', 'John Goodman'],
+      _1_names: ['Jeff Bridges', 'John Goodman'],
       first: -1,
       offset: 0,
       cypherParams: CYPHER_PARAMS
@@ -7791,8 +7791,8 @@ test('Deeply nested orderBy', t => {
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': 'name_desc',
-      '2_orderBy': ['title_asc', 'title_desc'],
+      _1_orderBy: 'name_desc',
+      _2_orderBy: ['title_asc', 'title_desc'],
       cypherParams: CYPHER_PARAMS
     };
 
@@ -7970,10 +7970,10 @@ test('Deeply nested query using temporal orderBy', t => {
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': 'datetime_asc',
-      '2_first': 2,
-      '2_offset': 1,
-      '2_orderBy': ['datetime_desc', 'time_desc']
+      _1_orderBy: 'datetime_asc',
+      _2_first: 2,
+      _2_offset: 1,
+      _2_orderBy: ['datetime_desc', 'time_desc']
     };
 
   t.plan(2);
@@ -8014,10 +8014,10 @@ test('query nested relationship with differences between selected and ordered fi
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': ['datetime_asc', 'datetime_desc'],
-      '2_first': 2,
-      '2_offset': 1,
-      '2_orderBy': ['datetime_desc', 'name_asc']
+      _1_orderBy: ['datetime_asc', 'datetime_desc'],
+      _2_first: 2,
+      _2_offset: 1,
+      _2_orderBy: ['datetime_desc', 'name_asc']
     };
 
   t.plan(2);
@@ -8046,9 +8046,9 @@ test('Order reflexive relationship field using temporal argument without corresp
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_first': 2,
-      '1_offset': 1,
-      '1_orderBy': ['datetime_desc', 'time_desc']
+      _1_first: 2,
+      _1_offset: 1,
+      _1_orderBy: ['datetime_desc', 'time_desc']
     };
 
   t.plan(2);
@@ -8079,7 +8079,7 @@ test('Order relationship field using temporal argument without corresponding fie
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': 'released_asc',
+      _1_orderBy: 'released_asc',
       cypherParams: CYPHER_PARAMS
     };
 
@@ -8584,14 +8584,14 @@ test('Handle nested @cypher fields using parameterized arguments and cypherParam
       },
       cypherParams: CYPHER_PARAMS
     },
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) RETURN \`movie\` {_id: ID(\`movie\`),currentUserId: apoc.cypher.runFirstColumn("RETURN $cypherParams.currentUserId AS cypherParamsUserId", {this: movie, cypherParams: $cypherParams, strArg: $1_strArg}, false),ratings: [(\`movie\`)<-[\`movie_ratings_relation\`:\`RATED\`]-(:\`User\`) | movie_ratings_relation {currentUserId: apoc.cypher.runFirstColumn("RETURN $cypherParams.currentUserId AS cypherParamsUserId", {this: movie_ratings_relation, cypherParams: $cypherParams, strArg: $2_strArg}, false),User: head([(:\`Movie\`${ADDITIONAL_MOVIE_LABELS})<-[\`movie_ratings_relation\`]-(\`movie_ratings_User\`:\`User\`) | movie_ratings_User { .name ,currentUserId: apoc.cypher.runFirstColumn("RETURN $cypherParams.currentUserId AS cypherParamsUserId", {this: movie_ratings_User, cypherParams: $cypherParams, strArg: $3_strArg, strInputArg: $3_strInputArg}, false)}]) }] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`${ADDITIONAL_MOVIE_LABELS}) RETURN \`movie\` {_id: ID(\`movie\`),currentUserId: apoc.cypher.runFirstColumn("RETURN $cypherParams.currentUserId AS cypherParamsUserId", {this: movie, cypherParams: $cypherParams, strArg: $_1_strArg}, false),ratings: [(\`movie\`)<-[\`movie_ratings_relation\`:\`RATED\`]-(:\`User\`) | movie_ratings_relation {currentUserId: apoc.cypher.runFirstColumn("RETURN $cypherParams.currentUserId AS cypherParamsUserId", {this: movie_ratings_relation, cypherParams: $cypherParams, strArg: $_2_strArg}, false),User: head([(:\`Movie\`${ADDITIONAL_MOVIE_LABELS})<-[\`movie_ratings_relation\`]-(\`movie_ratings_User\`:\`User\`) | movie_ratings_User { .name ,currentUserId: apoc.cypher.runFirstColumn("RETURN $cypherParams.currentUserId AS cypherParamsUserId", {this: movie_ratings_User, cypherParams: $cypherParams, strArg: $_3_strArg, strInputArg: $_3_strInputArg}, false)}]) }] } AS \`movie\``,
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_strArg': 'Yo Dawg',
-      '2_strArg': 'Yoo Dawg',
-      '3_strArg': 'Yooo Dawg',
-      '3_strInputArg': {
+      _1_strArg: 'Yo Dawg',
+      _2_strArg: 'Yoo Dawg',
+      _3_strArg: 'Yooo Dawg',
+      _3_strInputArg: {
         strArg: 'Yoooo Dawg'
       },
       cypherParams: CYPHER_PARAMS
@@ -8852,9 +8852,9 @@ test('Handle @cypher field with parameterized value for field of input type argu
     graphqlParams = {
       strArg: 'Yo Dawg'
     },
-    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` { .name ,currentUserId: apoc.cypher.runFirstColumn("RETURN $cypherParams.currentUserId AS cypherParamsUserId", {this: user, cypherParams: $cypherParams, strArg: "Neo4j", strInputArg: $1_strInputArg}, false)} AS \`user\``,
+    expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` { .name ,currentUserId: apoc.cypher.runFirstColumn("RETURN $cypherParams.currentUserId AS cypherParamsUserId", {this: user, cypherParams: $cypherParams, strArg: "Neo4j", strInputArg: $_1_strInputArg}, false)} AS \`user\``,
     expectedParams = {
-      '1_strInputArg': {
+      _1_strInputArg: {
         strArg: 'Yo Dawg'
       },
       first: -1,
@@ -8916,7 +8916,7 @@ test('Handle order by field with underscores - nested field ', t => {
     expectedCypherQuery =
       'WITH apoc.cypher.runFirstColumn("MATCH (g:Genre) WHERE toLower(g.name) CONTAINS toLower($substring) RETURN g", {offset:$offset, first:$first, substring:$substring, cypherParams: $cypherParams}, True) AS x UNWIND x AS `genre` RETURN `genre` {movies: apoc.coll.sortMulti([(`genre`)<-[:`IN_GENRE`]-(`genre_movies`:`Movie`:`u_user-id`:`newMovieLabel`) | `genre_movies` { .title , .someprefix_title_with_underscores }], [\'someprefix_title_with_underscores\']) } AS `genre`',
     expectedParams = {
-      '1_orderBy': 'someprefix_title_with_underscores_desc',
+      _1_orderBy: 'someprefix_title_with_underscores_desc',
       cypherParams: CYPHER_PARAMS,
       first: -1,
       offset: 0,
@@ -9516,8 +9516,8 @@ test('pagination used on root and nested interface type field', t => {
     expectedParams = {
       first: 2,
       offset: 1,
-      '1_first': 1,
-      '1_offset': 1,
+      _1_first: 1,
+      _1_offset: 1,
       Camera_derivedTypes: ['NewCamera', 'OldCamera'],
       cypherParams: CYPHER_PARAMS
     };
@@ -9553,7 +9553,7 @@ test('ordering used on root and nested interface type field', t => {
     expectedParams = {
       offset: 0,
       first: -1,
-      '1_orderBy': 'name_desc',
+      _1_orderBy: 'name_desc',
       cypherParams: CYPHER_PARAMS,
       Camera_derivedTypes: ['NewCamera', 'OldCamera']
     };
@@ -9648,7 +9648,7 @@ test('filtering used on root and nested interface using fragments and query vari
       },
       computedOperatorName: 'Johnnie Zoom'
     },
-    expectedCypherQuery = `MATCH (\`camera\`:\`Camera\` {type:$type}) WHERE ("NewCamera" IN labels(\`camera\`) OR "OldCamera" IN labels(\`camera\`)) RETURN head([\`camera\` IN [\`camera\`] WHERE "NewCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "NewCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE (\`camera_operators\`.userId = $_1_filter.userId) | \`camera_operators\` {FRAGMENT_TYPE: head( [ label IN labels(\`camera_operators\`) WHERE label IN $Person_derivedTypes ] ), .userId }] , .id , .type ,computedOperators: [ camera_computedOperators IN apoc.cypher.runFirstColumn("MATCH (this)<-[:cameras]-(p:Person) RETURN p", {this: camera, cypherParams: $cypherParams, name: $3_name}, true) | camera_computedOperators {FRAGMENT_TYPE: head( [ label IN labels(camera_computedOperators) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]  }] + [\`camera\` IN [\`camera\`] WHERE "OldCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "OldCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE (\`camera_operators\`.userId = $_1_filter.userId) | \`camera_operators\` {FRAGMENT_TYPE: head( [ label IN labels(\`camera_operators\`) WHERE label IN $Person_derivedTypes ] ), .userId }] , .id , .type ,computedOperators: [ camera_computedOperators IN apoc.cypher.runFirstColumn("MATCH (this)<-[:cameras]-(p:Person) RETURN p", {this: camera, cypherParams: $cypherParams, name: $3_name}, true) | camera_computedOperators {FRAGMENT_TYPE: head( [ label IN labels(camera_computedOperators) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]  }]) AS \`camera\``,
+    expectedCypherQuery = `MATCH (\`camera\`:\`Camera\` {type:$type}) WHERE ("NewCamera" IN labels(\`camera\`) OR "OldCamera" IN labels(\`camera\`)) RETURN head([\`camera\` IN [\`camera\`] WHERE "NewCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "NewCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE (\`camera_operators\`.userId = $_1_filter.userId) | \`camera_operators\` {FRAGMENT_TYPE: head( [ label IN labels(\`camera_operators\`) WHERE label IN $Person_derivedTypes ] ), .userId }] , .id , .type ,computedOperators: [ camera_computedOperators IN apoc.cypher.runFirstColumn("MATCH (this)<-[:cameras]-(p:Person) RETURN p", {this: camera, cypherParams: $cypherParams, name: $_3_name}, true) | camera_computedOperators {FRAGMENT_TYPE: head( [ label IN labels(camera_computedOperators) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]  }] + [\`camera\` IN [\`camera\`] WHERE "OldCamera" IN labels(\`camera\`) | \`camera\` { FRAGMENT_TYPE: "OldCamera", operators: [(\`camera\`)<-[:\`cameras\`]-(\`camera_operators\`:\`Person\`) WHERE (\`camera_operators\`.userId = $_1_filter.userId) | \`camera_operators\` {FRAGMENT_TYPE: head( [ label IN labels(\`camera_operators\`) WHERE label IN $Person_derivedTypes ] ), .userId }] , .id , .type ,computedOperators: [ camera_computedOperators IN apoc.cypher.runFirstColumn("MATCH (this)<-[:cameras]-(p:Person) RETURN p", {this: camera, cypherParams: $cypherParams, name: $_3_name}, true) | camera_computedOperators {FRAGMENT_TYPE: head( [ label IN labels(camera_computedOperators) WHERE label IN $Person_derivedTypes ] ), .userId , .name }]  }]) AS \`camera\``,
     expectedParams = {
       offset: 0,
       first: -1,
@@ -9656,7 +9656,7 @@ test('filtering used on root and nested interface using fragments and query vari
       _1_filter: {
         userId: 'man001'
       },
-      '3_name': 'Johnnie Zoom',
+      _3_name: 'Johnnie Zoom',
       Person_derivedTypes: ['Actor', 'CameraMan', 'User'],
       cypherParams: CYPHER_PARAMS
     };
@@ -11196,8 +11196,8 @@ test('query union type relationship using pagination', t => {
   }`,
     expectedCypherQuery = `MATCH (\`user\`:\`User\`) RETURN \`user\` {movieSearch: [(\`user\`)--(\`user_movieSearch\`:\`MovieSearch\`) WHERE ("Genre" IN labels(\`user_movieSearch\`) OR "Movie" IN labels(\`user_movieSearch\`)) | head([\`user_movieSearch\` IN [\`user_movieSearch\`] WHERE "Genre" IN labels(\`user_movieSearch\`) | \`user_movieSearch\` { FRAGMENT_TYPE: "Genre",  .name  }] + [\`user_movieSearch\` IN [\`user_movieSearch\`] WHERE "Movie" IN labels(\`user_movieSearch\`) | \`user_movieSearch\` { FRAGMENT_TYPE: "Movie",  .title ,_id: ID(\`user_movieSearch\`) }])][1..3] } AS \`user\``,
     expectedParams = {
-      '1_first': 2,
-      '1_offset': 1,
+      _1_first: 2,
+      _1_offset: 1,
       offset: 0,
       first: -1,
       cypherParams: CYPHER_PARAMS
@@ -11680,7 +11680,7 @@ test('filter relationship type field with a custom field name for both related n
     }
   }
   `,
-    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`:\`u_user-id\`:\`newMovieLabel\`) WHERE (EXISTS((\`movie\`)<-[:RATED_CUSTOM_FROM_TO]-(:User)) AND ALL(\`movie_filter_user\` IN [(\`movie\`)<-[\`_movie_filter_user\`:RATED_CUSTOM_FROM_TO]-(:User) | \`_movie_filter_user\`] WHERE (\`movie_filter_user\`.from = $filter.ratingsCustomFromTo.from) AND (\`movie_filter_user\`.to = $filter.ratingsCustomFromTo.to) AND (ALL(\`user\` IN [(\`movie\`)<-[\`movie_filter_user\`]-(\`_user\`:User) | \`_user\`] WHERE ($filter.ratingsCustomFromTo.ratedBy._name_not_null = TRUE AND EXISTS(\`user\`.name)))))) RETURN \`movie\` { .movieId ,ratingsCustomFromTo: [(\`movie\`)<-[\`movie_ratingsCustomFromTo_relation\`:\`RATED_CUSTOM_FROM_TO\`{from:$1_from, to:$1_to}]-(:\`User\`) | movie_ratingsCustomFromTo_relation { .rating , .ratings , .from , .to ,ratedBy: head([(:\`Movie\`:\`u_user-id\`:\`newMovieLabel\`)<-[\`movie_ratingsCustomFromTo_relation\`]-(\`movie_ratingsCustomFromTo_ratedBy\`:\`User\`) | movie_ratingsCustomFromTo_ratedBy { .userId , .name }]) }] } AS \`movie\``,
+    expectedCypherQuery = `MATCH (\`movie\`:\`Movie\`:\`u_user-id\`:\`newMovieLabel\`) WHERE (EXISTS((\`movie\`)<-[:RATED_CUSTOM_FROM_TO]-(:User)) AND ALL(\`movie_filter_user\` IN [(\`movie\`)<-[\`_movie_filter_user\`:RATED_CUSTOM_FROM_TO]-(:User) | \`_movie_filter_user\`] WHERE (\`movie_filter_user\`.from = $filter.ratingsCustomFromTo.from) AND (\`movie_filter_user\`.to = $filter.ratingsCustomFromTo.to) AND (ALL(\`user\` IN [(\`movie\`)<-[\`movie_filter_user\`]-(\`_user\`:User) | \`_user\`] WHERE ($filter.ratingsCustomFromTo.ratedBy._name_not_null = TRUE AND EXISTS(\`user\`.name)))))) RETURN \`movie\` { .movieId ,ratingsCustomFromTo: [(\`movie\`)<-[\`movie_ratingsCustomFromTo_relation\`:\`RATED_CUSTOM_FROM_TO\`{from:$_1_from, to:$_1_to}]-(:\`User\`) | movie_ratingsCustomFromTo_relation { .rating , .ratings , .from , .to ,ratedBy: head([(:\`Movie\`:\`u_user-id\`:\`newMovieLabel\`)<-[\`movie_ratingsCustomFromTo_relation\`]-(\`movie_ratingsCustomFromTo_ratedBy\`:\`User\`) | movie_ratingsCustomFromTo_ratedBy { .userId , .name }]) }] } AS \`movie\``,
     expectedParams = {
       offset: 0,
       first: -1,
@@ -11693,8 +11693,8 @@ test('filter relationship type field with a custom field name for both related n
           }
         }
       },
-      '1_from': 'hello',
-      '1_to': 10,
+      _1_from: 'hello',
+      _1_to: 10,
       cypherParams: CYPHER_PARAMS
     };
 
@@ -12046,7 +12046,7 @@ test('filter reflexive relationship type field with custom a field name both rel
     }
   }
   `,
-    expectedCypherQuery = `MATCH (\`user\`:\`User\`) WHERE ((EXISTS((\`user\`)<-[:FRIEND_OF_CUSTOM_FROM_TO]-(:User)) AND ALL(\`user_filter_user\` IN [(\`user\`)<-[\`_user_filter_user\`:FRIEND_OF_CUSTOM_FROM_TO]-(:User) | \`_user_filter_user\`] WHERE (\`user_filter_user\`.from = $filter.friendsCustomFromTo.friendedBy.from) AND (\`user_filter_user\`.to = $filter.friendsCustomFromTo.friendedBy.to) AND (ALL(\`user\` IN [(\`user\`)-[\`user_filter_user\`]->(\`_user\`:User) | \`_user\`] WHERE ($filter.friendsCustomFromTo.friendedBy.User._userId_not_null = TRUE AND EXISTS(\`user\`.userId)))))) AND (EXISTS((\`user\`)-[:FRIEND_OF_CUSTOM_FROM_TO]->(:User)) AND ALL(\`user_filter_user\` IN [(\`user\`)-[\`_user_filter_user\`:FRIEND_OF_CUSTOM_FROM_TO]->(:User) | \`_user_filter_user\`] WHERE (\`user_filter_user\`.from = $filter.friendsCustomFromTo.friended.from) AND (\`user_filter_user\`.to = $filter.friendsCustomFromTo.friended.to) AND (ALL(\`user\` IN [(\`user\`)-[\`user_filter_user\`]->(\`_user\`:User) | \`_user\`] WHERE ($filter.friendsCustomFromTo.friended.User._name_null = TRUE AND NOT EXISTS(\`user\`.name))))))) RETURN \`user\` { .userId ,friendsCustomFromTo: {friendedBy: [(\`user\`)<-[\`user_to_relation\`:\`FRIEND_OF_CUSTOM_FROM_TO\`{from:$1_from, to:$1_to}]-(\`user_friendedBy\`:\`User\`) | user_to_relation { .from , .to , .ratings ,User: user_friendedBy { .userId } }] ,friended: [(\`user\`)-[\`user_to_relation\`:\`FRIEND_OF_CUSTOM_FROM_TO\`{to:$3_to, from:$3_from}]->(\`user_friended\`:\`User\`) | user_to_relation { .ratings ,User: user_friended { .userId } , .to , .from }] } } AS \`user\``,
+    expectedCypherQuery = `MATCH (\`user\`:\`User\`) WHERE ((EXISTS((\`user\`)<-[:FRIEND_OF_CUSTOM_FROM_TO]-(:User)) AND ALL(\`user_filter_user\` IN [(\`user\`)<-[\`_user_filter_user\`:FRIEND_OF_CUSTOM_FROM_TO]-(:User) | \`_user_filter_user\`] WHERE (\`user_filter_user\`.from = $filter.friendsCustomFromTo.friendedBy.from) AND (\`user_filter_user\`.to = $filter.friendsCustomFromTo.friendedBy.to) AND (ALL(\`user\` IN [(\`user\`)-[\`user_filter_user\`]->(\`_user\`:User) | \`_user\`] WHERE ($filter.friendsCustomFromTo.friendedBy.User._userId_not_null = TRUE AND EXISTS(\`user\`.userId)))))) AND (EXISTS((\`user\`)-[:FRIEND_OF_CUSTOM_FROM_TO]->(:User)) AND ALL(\`user_filter_user\` IN [(\`user\`)-[\`_user_filter_user\`:FRIEND_OF_CUSTOM_FROM_TO]->(:User) | \`_user_filter_user\`] WHERE (\`user_filter_user\`.from = $filter.friendsCustomFromTo.friended.from) AND (\`user_filter_user\`.to = $filter.friendsCustomFromTo.friended.to) AND (ALL(\`user\` IN [(\`user\`)-[\`user_filter_user\`]->(\`_user\`:User) | \`_user\`] WHERE ($filter.friendsCustomFromTo.friended.User._name_null = TRUE AND NOT EXISTS(\`user\`.name))))))) RETURN \`user\` { .userId ,friendsCustomFromTo: {friendedBy: [(\`user\`)<-[\`user_to_relation\`:\`FRIEND_OF_CUSTOM_FROM_TO\`{from:$_1_from, to:$_1_to}]-(\`user_friendedBy\`:\`User\`) | user_to_relation { .from , .to , .ratings ,User: user_friendedBy { .userId } }] ,friended: [(\`user\`)-[\`user_to_relation\`:\`FRIEND_OF_CUSTOM_FROM_TO\`{to:$_3_to, from:$_3_from}]->(\`user_friended\`:\`User\`) | user_to_relation { .ratings ,User: user_friended { .userId } , .to , .from }] } } AS \`user\``,
     expectedParams = {
       offset: 0,
       first: -1,
@@ -12068,10 +12068,10 @@ test('filter reflexive relationship type field with custom a field name both rel
           }
         }
       },
-      '1_from': 'hello',
-      '1_to': 10,
-      '3_to': 10,
-      '3_from': 'hello',
+      _1_from: 'hello',
+      _1_to: 10,
+      _3_to: 10,
+      _3_from: 'hello',
       cypherParams: CYPHER_PARAMS
     };
 

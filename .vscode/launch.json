@@ -40,7 +40,6 @@
       "name": "Debug AVA test file specific",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/ava",
       "runtimeArgs": [
-        "test/unit/cypherTest.test.js",
         "--match 'filter relationship type field with a custom field name for both related node types'"
       ],
       "outputCapture": "std",
