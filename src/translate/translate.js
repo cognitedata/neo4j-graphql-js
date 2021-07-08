@@ -233,6 +233,7 @@ export const relationFieldOnNodeType = ({
     params: selectionFilters,
     paramIndex
   });
+  // `idx_xxx` => `_idx_xxx`
   const filterParamKey = `_${tailParams.paramIndex}_filter`;
   const fieldArgumentParams = subSelection[1];
   const filterParam = fieldArgumentParams[filterParamKey];
@@ -339,6 +340,7 @@ export const relationTypeFieldOnNodeType = ({
       paramIndex,
       rootIsRelationType: true
     });
+    // `idx_xxx` => `_idx_xxx`
     const filterParamKey = `_${tailParams.paramIndex}_filter`;
     const fieldArgumentParams = subSelection[1];
     const filterParam = fieldArgumentParams[filterParamKey];
@@ -635,6 +637,7 @@ const directedNodeTypeFieldOnRelationType = ({
         paramIndex,
         rootIsRelationType: true
       });
+      // `idx_xxx` => `_idx_xxx`
       const filterParamKey = `_${tailParams.paramIndex}_filter`;
       const fieldArgumentParams = subSelection[1];
       const filterParam = fieldArgumentParams[filterParamKey];
@@ -1572,6 +1575,7 @@ export const processFilterArgument = ({
   const filterValue = Object.keys(params).length
     ? params[argumentName]
     : undefined;
+  // `idx_xxx` => `_idx_xxx`
   const filterParamKey =
     paramIndex > 1 ? `_${paramIndex - 1}_${argumentName}` : argumentName;
   const filterCypherParam = `$${filterParamKey}`;
@@ -3055,6 +3059,7 @@ export const translateListArguments = ({
       const listVariable = `${safeVariableName}.${safeVar(argumentName)}`;
       let paramPath = `$${argumentName}`;
       // Possibly use the already generated index used when naming nested parameters
+      // `idx_xxx` => `_idx_xxx`
       if (paramIndex >= 1) paramPath = `$_${paramIndex}_${argumentName}`;
       let translation = '';
       if (field) {

@@ -70,7 +70,7 @@ export function buildCypherSelection({
   const filterParams = getFilterParams(selectionFilters, paramIndex);
   const shallowFilterParams = Object.entries(filterParams).reduce(
     (result, [key, value]) => {
-      // TODO rename to another `_idx_xxx`
+      // `idx_xxx` => `_idx_xxx`
       result[`_${value.index}_${key}`] = value.value;
       return result;
     },
