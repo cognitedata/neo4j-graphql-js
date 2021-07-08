@@ -233,7 +233,8 @@ export const relationFieldOnNodeType = ({
     params: selectionFilters,
     paramIndex
   });
-  const filterParamKey = `${tailParams.paramIndex}_filter`;
+  // `idx_xxx` => `_idx_xxx`
+  const filterParamKey = `_${tailParams.paramIndex}_filter`;
   const fieldArgumentParams = subSelection[1];
   const filterParam = fieldArgumentParams[filterParamKey];
   if (
@@ -339,7 +340,8 @@ export const relationTypeFieldOnNodeType = ({
       paramIndex,
       rootIsRelationType: true
     });
-    const filterParamKey = `${tailParams.paramIndex}_filter`;
+    // `idx_xxx` => `_idx_xxx`
+    const filterParamKey = `_${tailParams.paramIndex}_filter`;
     const fieldArgumentParams = subSelection[1];
     const filterParam = fieldArgumentParams[filterParamKey];
     if (
@@ -635,7 +637,8 @@ const directedNodeTypeFieldOnRelationType = ({
         paramIndex,
         rootIsRelationType: true
       });
-      const filterParamKey = `${tailParams.paramIndex}_filter`;
+      // `idx_xxx` => `_idx_xxx`
+      const filterParamKey = `_${tailParams.paramIndex}_filter`;
       const fieldArgumentParams = subSelection[1];
       const filterParam = fieldArgumentParams[filterParamKey];
 
@@ -1572,8 +1575,9 @@ export const processFilterArgument = ({
   const filterValue = Object.keys(params).length
     ? params[argumentName]
     : undefined;
+  // `idx_xxx` => `_idx_xxx`
   const filterParamKey =
-    paramIndex > 1 ? `${paramIndex - 1}_${argumentName}` : argumentName;
+    paramIndex > 1 ? `_${paramIndex - 1}_${argumentName}` : argumentName;
   const filterCypherParam = `$${filterParamKey}`;
   let translations = [];
   // allows an exception for the existence of the filter argument AST
@@ -3055,7 +3059,8 @@ export const translateListArguments = ({
       const listVariable = `${safeVariableName}.${safeVar(argumentName)}`;
       let paramPath = `$${argumentName}`;
       // Possibly use the already generated index used when naming nested parameters
-      if (paramIndex >= 1) paramPath = `$${paramIndex}_${argumentName}`;
+      // `idx_xxx` => `_idx_xxx`
+      if (paramIndex >= 1) paramPath = `$_${paramIndex}_${argumentName}`;
       let translation = '';
       if (field) {
         // list argument matches the name of a field

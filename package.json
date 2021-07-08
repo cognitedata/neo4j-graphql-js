@@ -74,7 +74,7 @@
     "@babel/runtime-corejs2": "^7.5.5",
     "apollo-server-errors": "^2.4.1",
     "debug": "^4.1.1",
-    "graphql": "^15.5.0",
+    "graphql": "15.5.0",
     "graphql-auth-directives": "^2.2.2",
     "graphql-tools": "^7.0.2",
     "lodash": "^4.17.19",

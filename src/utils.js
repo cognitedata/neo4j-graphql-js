@@ -146,7 +146,8 @@ export function cypherDirectiveArgs(
       federatedOperationParams[e] === undefined
     ) {
       // Use only if value exists
-      args.push(`${e}: $${paramIndex}_${e}`);
+      // `idx_xxx` => `_idx_xxx`
+      args.push(`${e}: $_${paramIndex}_${e}`);
     }
   });
   // Return the comma separated join of all param
@@ -309,7 +310,8 @@ export function paramsToString(params, cypherParams) {
       return `${param.key}:${param.paramKey ? `$${param.paramKey}.` : '$'}${
         !param.value || typeof param.value.index === 'undefined'
           ? param.key
-          : `${param.value.index}_${param.key}`
+          : // `idx_xxx` => `_idx_xxx`
+            `_${param.value.index}_${param.key}`
       }`;
     });
     return `{${strings.join(', ')}${
@@ -895,7 +897,8 @@ export const neo4jTypePredicateClauses = (
         if (paramValue) argValue = paramValue;
         const parentParamPath = parentParam ? `${parentParam}.` : '';
         const paramPath = `${parentParamPath}${
-          paramIndex >= 1 ? `${paramIndex}_` : ''
+          // `idx_xxx` => `_idx_xxx`
+          paramIndex >= 1 ? `_${paramIndex}_` : ''
         }${argName}`;
         const propertyPath = `${variableName}.${argName}`;
         const cypherTypeConstructor = decideNeo4jTypeConstructor(typeName);
