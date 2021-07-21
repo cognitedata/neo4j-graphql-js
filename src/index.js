@@ -344,7 +344,8 @@ export const searchSchema = async ({
   driver,
   schema,
   debug = false,
-  sessionParams = {}
+  sessionParams = {},
+  dropExisting = true
 }) => {
   const session = driver.session(sessionParams);
   // drop all search indexes, given they cannot be updated via a second CALL to createNodeIndex
@@ -353,42 +354,43 @@ export const searchSchema = async ({
   CALL db.index.fulltext.drop(name)
   RETURN TRUE
   `;
-  const createStatement = schemaSearch({ schema });
-  const dropResult = await session.writeTransaction(tx =>
-    tx.run(dropStatement).then(result => {
-      if (debug === true) {
-        console.log(
-          `\n[searchSchema] Search indexes dropped using Cypher:${dropStatement}`
-        );
-      }
-      return true;
-    })
-  );
-
-  if (dropResult) {
-    if (createStatement) {
-      return await session
-        .writeTransaction(tx =>
-          tx.run(createStatement).then(result => {
-            if (debug === true) {
-              console.log(
-                `[searchSchema] Search indexes created using Cypher:\n${createStatement}\n`
-              );
-            }
-            return true;
-          })
-        )
-        .finally(() => session.close());
-    } else {
-      if (debug === true) {
-        console.log(
-          '[searchSchema] There were no @search directive fields discovered in the schema.\n'
-        );
-      }
-      return true;
+  if (dropExisting) {
+    const dropResult = await session.writeTransaction(tx =>
+      tx.run(dropStatement).then(result => {
+        if (debug === true) {
+          console.log(
+            `\n[searchSchema] Search indexes dropped using Cypher:${dropStatement}`
+          );
+        }
+        return true;
+      })
+    );
+    if (!dropResult) {
+      session.close();
+      return false;
     }
-  } else {
-    session.close();
   }
-  return false;
+
+  const createStatement = schemaSearch({ schema });
+  if (createStatement) {
+    return await session
+      .writeTransaction(tx =>
+        tx.run(createStatement).then(result => {
+          if (debug === true) {
+            console.log(
+              `[searchSchema] Search indexes created using Cypher:\n${createStatement}\n`
+            );
+          }
+          return true;
+        })
+      )
+      .finally(() => session.close());
+  }
+  if (debug === true) {
+    console.log(
+      '[searchSchema] There were no @search directive fields discovered in the schema.\n'
+    );
+  }
+  session.close();
+  return true;
 };
